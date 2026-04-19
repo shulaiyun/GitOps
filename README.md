@@ -10,6 +10,7 @@
 - `adr/`: architecture decisions that lock in important choices
 - `phases/`: one file per phase with done criteria, current result, and the next handoff point
 - `runbooks/`: deployment, rollback, recovery, and bootstrap procedures
+- `runbooks/server-to-mac-migration.md`: Mac feasibility assessment and server-to-Mac migration flow
 - `stacks/`: file-based compose stacks, including the new platform core stack
 - `k8s/`: K3s bootstrap assets and first-pass app manifests
 - `scripts/`: validation and inventory helpers

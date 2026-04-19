@@ -2,7 +2,7 @@ name: platform-core
 
 services:
   traefik:
-    image: traefik:v3.1
+    image: traefik:v3.6
     container_name: platform-traefik
     restart: unless-stopped
     command:
@@ -80,6 +80,8 @@ services:
       - "${UPTIME_KUMA_PORT:-15003}:3001"
     volumes:
       - ./data/uptime-kuma:/app/data
+    extra_hosts:
+      - host.docker.internal:host-gateway
     networks:
       - platform-core
     labels:
@@ -114,15 +116,16 @@ services:
     profiles:
       - agent
     network_mode: host
+    env_file:
+      - path: ./data/beszel-agent/agent.env
+        required: false
     volumes:
       - ./data/beszel-agent:/var/lib/beszel-agent
       - ./data/beszel-socket:/beszel_socket
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       LISTEN: "${BESZEL_AGENT_LISTEN:-/beszel_socket/beszel.sock}"
-      KEY: "${BESZEL_AGENT_KEY}"
       HUB_URL: http://localhost:${BESZEL_PORT:-15004}
-      TOKEN: "${BESZEL_AGENT_TOKEN}"
 
 networks:
   platform-core:

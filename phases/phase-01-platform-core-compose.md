@@ -10,7 +10,9 @@ Add one shared operational layer above the existing compose estate so services b
 - Homepage config is preloaded with current business and platform endpoints.
 - Traefik dynamic routes proxy current host-bound services under `*.localhost` hostnames.
 - `inventory/uptime-targets.yaml` captures the intended Uptime Kuma monitor list.
-- `Homepage` and `Beszel` are already live on the current host.
+- `Homepage`, `Beszel`, `Traefik`, `Dockge`, and `Uptime Kuma` can all be brought up from the same stack.
+- `scripts/setup_beszel_local_agent.sh` provisions the local Beszel agent without hand-editing tokens into tracked files.
+- `scripts/setup_uptime_kuma_targets.sh` bootstraps Uptime Kuma, creates the first admin user, and imports the tracked monitors.
 
 ## Done definition
 
@@ -18,6 +20,8 @@ Add one shared operational layer above the existing compose estate so services b
 - Homepage renders the current runtime map.
 - Dockge can manage new stacks under `platform-control/stacks`.
 - Uptime Kuma and Beszel are reachable on their direct ports and through Traefik.
+- The local Beszel agent is connected and container metrics are available.
+- Uptime Kuma has the initial monitor set imported from inventory.
 
 ## Verification
 
@@ -32,13 +36,17 @@ Current live checks:
 ```bash
 curl -I http://127.0.0.1:15002
 curl -I http://127.0.0.1:15004
+curl -I http://127.0.0.1:15003
+curl -I http://home.localhost:15080
+bash scripts/setup_beszel_local_agent.sh
+bash scripts/setup_uptime_kuma_targets.sh
 ```
 
 ## Next entry point
 
-Bring up Traefik, Dockge, and Uptime Kuma when the remaining images are pulled, add monitors from `inventory/uptime-targets.yaml`, then prepare the separate K3s lab host.
+Keep the monitor inventory in sync with new services, then prepare the separate K3s lab host.
 
 ## Open questions
 
 - Which hostnames should become permanent public or internal DNS names after the localhost phase?
-- When should the Beszel agent be activated and keyed?
+- Should Uptime Kuma stay socket-script managed, or should the monitor list later become a pure Git-rendered backup/import artifact?

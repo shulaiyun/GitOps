@@ -1,35 +1,34 @@
 - Business Services:
     - Sloth Cloud Web:
         href: http://cloud.localhost:15080
-        description: Storefront and customer UI.
+        description: 商店前台与客户入口。
     - Sloth Cloud API:
         href: http://cloud-api.localhost:15080
-        description: Fastify API health and runtime control plane.
+        description: Fastify API 与运行时控制面。
     - Sloth Cloud Paymenter:
         href: http://paymenter.localhost:15080
-        description: Payment and provisioning app tier.
+        description: 支付与开通应用层。
     - Sloth Convoy:
         href: http://convoy.localhost:15080
-        description: Convoy panel front end.
+        description: Convoy 面板前端。
     - Sloth Xboard:
         href: http://xboard.localhost:15080
-        description: VPN panel front end.
+        description: VPN 面板前端。
     - CLI Proxy API:
-        href: http://cliproxy.localhost:15080
-        description: Internal localhost-bound service via Traefik host proxy.
+        description: 本地工具 API，没有独立浏览器页面。
 - Platform:
     - Homepage:
-        href: http://home.localhost:15080
-        description: Shared operations entry point.
+        href: http://127.0.0.1:15002
+        description: 服务目录与统一操作入口。
     - Dockge:
-        href: http://dockge.localhost:15080
-        description: Compose stack manager.
+        href: http://127.0.0.1:15001
+        description: Compose 栈管理面板。
     - Uptime Kuma:
-        href: http://uptime.localhost:15080
-        description: Black-box health checks.
+        href: http://127.0.0.1:15003
+        description: 对外可用性与黑盒探测。
     - Beszel:
-        href: http://beszel.localhost:15080
-        description: Host and container metrics hub.
+        href: http://127.0.0.1:15004
+        description: 主机与容器资源监控。
     - Traefik Dashboard:
-        href: http://traefik.localhost:15080
-        description: Shared compose edge and routing view.
+        href: http://traefik.localhost:15080/dashboard/
+        description: 边缘路由与代理状态视图。

@@ -3,6 +3,14 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 CONFIG_FILE="${ROOT}/k8s/bootstrap/config/k3s-config.yaml"
+OS_NAME="$(uname -s)"
+
+if [ "${OS_NAME}" != "Linux" ]; then
+  echo "install-k3s.sh must run on a Linux lab node." >&2
+  echo "Current host: ${OS_NAME}" >&2
+  echo "Use this Mac as the control workstation only, then run the script on a Linux VM or server." >&2
+  exit 1
+fi
 
 if ! command -v curl >/dev/null 2>&1; then
   echo "curl is required" >&2

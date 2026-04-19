@@ -18,9 +18,13 @@
 
 - Phase 0 is implemented as a real service inventory covering every currently running container.
 - Phase 1 is implemented as a compose-based platform core stack for Traefik, Dockge, Homepage, Uptime Kuma, and Beszel.
+- `Homepage`, `Dockge`, `Uptime Kuma`, `Beszel`, and `Traefik` can all be started from the same platform core stack.
 - `Homepage` and `Beszel` are already running on this host at `http://127.0.0.1:15002` and `http://127.0.0.1:15004`.
+- `scripts/setup_beszel_local_agent.sh` provisions the local Beszel agent, and `scripts/setup_uptime_kuma_targets.sh` bootstraps Uptime Kuma plus the initial monitors.
 - Phase 2 is implemented as a bootstrapable K3s/Kubernetes skeleton with Argo CD, cert-manager, External Secrets, Traefik Gateway, Loki, and kube-prometheus-stack bootstrap scripts.
+- `k8s/apps/kustomization.yaml` and `k8s/apps/sloth-cloud-api/lab` now provide the first real GitOps-syncable app path.
 - The live machine still runs the business services on Compose. K3s is prepared but intentionally not installed by default on this host.
+- GitOps means Git is the single source of truth for platform changes, and Argo CD is the controller that syncs those Git changes into Kubernetes.
 
 ## Recommended workflow
 
@@ -36,6 +40,7 @@ Validate the repo:
 ```bash
 cd "/Users/shulai/Documents/New project/platform-control"
 ruby scripts/validate_platform_control.rb
+ruby scripts/validate_k8s_manifests.rb
 ```
 
 Preview the platform core stack:
@@ -50,9 +55,17 @@ Bring up the platform core stack:
 docker compose -f stacks/platform-core/compose.yaml up -d
 ```
 
+Bootstrap the operational tools:
+
+```bash
+bash scripts/setup_beszel_local_agent.sh
+bash scripts/setup_uptime_kuma_targets.sh
+```
+
 Prepare the K3s lab host:
 
 ```bash
+bash scripts/preflight_k3s_lab.sh
 bash k8s/bootstrap/scripts/install-k3s.sh
 bash k8s/bootstrap/scripts/bootstrap-platform.sh
 ```

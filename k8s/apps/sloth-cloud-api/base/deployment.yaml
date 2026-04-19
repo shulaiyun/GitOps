@@ -26,10 +26,6 @@ spec:
           env:
             - name: PORT
               value: "4000"
-            - name: MANAGED_APP_ENABLED
-              value: "true"
-            - name: MANAGED_APP_DRIVER
-              value: "in-cluster"
           resources:
             requests:
               cpu: 100m

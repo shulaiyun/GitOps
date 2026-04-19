@@ -35,9 +35,9 @@ compose_projects:
     notes: "Local internal API aggregator; bound to localhost-only ports."
   - id: platform-core
     project: platform-core
-    status: partially-running
+    status: running
     owner: shulai
     compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
     working_dir: /Users/shulai/Documents/New project/platform-control/stacks/platform-core
     adoption_status: managed
-    notes: "Homepage and Beszel are live. Traefik, Dockge, Uptime Kuma, and the Beszel agent remain staged in the same compose file."
+    notes: "Traefik, Dockge, Homepage, Uptime Kuma, Beszel, and the Beszel agent are live from the same compose stack."

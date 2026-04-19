@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 VALUES_DIR="${ROOT}/k8s/bootstrap/values"
 MANIFESTS_DIR="${ROOT}/k8s/bootstrap/manifests"
 
-for cmd in kubectl helm curl; do
+for cmd in kubectl helm curl envsubst git; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "$cmd is required" >&2
     exit 1
@@ -15,6 +15,10 @@ done
 export PLATFORM_GIT_REPO="${PLATFORM_GIT_REPO:-}"
 export PLATFORM_GIT_REVISION="${PLATFORM_GIT_REVISION:-main}"
 export GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD:-change-me-now}"
+
+if [[ -z "${PLATFORM_GIT_REPO}" ]] && git -C "${ROOT}" remote get-url origin >/dev/null 2>&1; then
+  export PLATFORM_GIT_REPO="$(git -C "${ROOT}" remote get-url origin)"
+fi
 
 kubectl apply -f "${MANIFESTS_DIR}/namespaces.yaml"
 

@@ -1,5 +1,25 @@
 http:
   routers:
+    platform-homepage:
+      rule: Host(`home.localhost`)
+      entryPoints: [web]
+      service: platform-homepage
+    platform-dockge:
+      rule: Host(`dockge.localhost`)
+      entryPoints: [web]
+      service: platform-dockge
+    platform-uptime-kuma:
+      rule: Host(`uptime.localhost`)
+      entryPoints: [web]
+      service: platform-uptime-kuma
+    platform-beszel:
+      rule: Host(`beszel.localhost`)
+      entryPoints: [web]
+      service: platform-beszel
+    traefik-dashboard:
+      rule: Host(`traefik.localhost`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      entryPoints: [web]
+      service: api@internal
     sloth-cloud-web:
       rule: Host(`cloud.localhost`)
       entryPoints: [web]
@@ -25,6 +45,22 @@ http:
       entryPoints: [web]
       service: cli-proxy-api
   services:
+    platform-homepage:
+      loadBalancer:
+        servers:
+          - url: http://platform-homepage:3000
+    platform-dockge:
+      loadBalancer:
+        servers:
+          - url: http://platform-dockge:5001
+    platform-uptime-kuma:
+      loadBalancer:
+        servers:
+          - url: http://platform-uptime-kuma:3001
+    platform-beszel:
+      loadBalancer:
+        servers:
+          - url: http://platform-beszel-hub:8090
     sloth-cloud-web:
       loadBalancer:
         servers:

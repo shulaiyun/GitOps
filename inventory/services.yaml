@@ -158,6 +158,27 @@ services:
       compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
       compose_service: sloth-cloud-proxy-relay
     notes: "Host-network TCP relay for outbound proxying. Keep simple, but standardize early."
+  - id: sloth-cloud-local-tunnel
+    status: running
+    project: sloth-cloud
+    compose_project:
+    kind: stateless
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes: []
+    networks: [bridge]
+    dependencies: []
+    data_class: stateless
+    migration_class: first-batch-k8s
+    customer_visibility: internal
+    source:
+      image: cloudflare/cloudflared:latest
+      launch_mode: manual-docker
+    notes: "Manual cloudflared tunnel sidecar. It is inventoried here specifically because it has not yet been adopted into a tracked compose stack."
   - id: sloth-convoy-web
     status: running
     project: sloth-convoy

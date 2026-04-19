@@ -41,13 +41,44 @@ docker compose -f stacks/platform-core/compose.yaml up -d
 - `http://xboard.localhost:15080`
 - `http://cliproxy.localhost:15080`
 
-## Post-deploy tasks
+## Usage notes
 
-1. In Uptime Kuma, create monitors from `inventory/uptime-targets.yaml`.
-2. In Beszel, generate a token and public key, then enable the `agent` profile:
+### Homepage
+
+- Homepage is the curated service catalog, not the service manager itself.
+- The cards under `Business Services` are the routed business entrypoints.
+- The cards under `Platform` intentionally use direct local ports for the operational tools, so they still open even if Traefik is unhealthy.
+- UI language can be pinned in `stacks/platform-core/config/homepage/settings.yaml` with `language: zh-Hans` or `language: en`.
+- Homepage supports translated UI chrome, but it does not expose a built-in runtime language toggle for end users.
+
+### Beszel
+
+- Beszel is the metrics hub, but it stays empty until at least one agent is connected.
+- For this host, use the local agent helper to mint a universal token and start the socket-based agent:
 
 ```bash
-docker compose -f stacks/platform-core/compose.yaml --profile agent up -d
+cd "/Users/shulai/Documents/New project/platform-control"
+bash scripts/setup_beszel_local_agent.sh
+```
+
+- Once the local agent is online, the system and container tables will populate automatically.
+
+## Post-deploy tasks
+
+1. Bootstrap Uptime Kuma and import the tracked monitors:
+
+```bash
+bash scripts/setup_uptime_kuma_targets.sh
+```
+
+The generated login is stored at:
+
+`stacks/platform-core/data/uptime-kuma/credentials.env`
+
+2. In Beszel, connect the local agent:
+
+```bash
+bash scripts/setup_beszel_local_agent.sh
 ```
 
 3. In Dockge, treat `platform-control/stacks` as the managed compose root.

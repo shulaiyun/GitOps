@@ -11,7 +11,10 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/bootstrap/scripts/install-k3s.sh` installs K3s with Traefik disabled.
 - `k8s/bootstrap/scripts/bootstrap-platform.sh` bootstraps Argo CD, cert-manager, External Secrets, Traefik Gateway, kube-prometheus-stack, and Loki.
 - `k8s/bootstrap/scripts/create-k3d-cluster.sh` creates a local macOS-friendly K3s lab by using k3d on top of Docker.
+- `k8s/bootstrap/scripts/bootstrap-platform-mac-learning.sh` bootstraps the Mac lab in a lighter learning-first mode.
+- `k8s/bootstrap/scripts/show-argocd-admin-password.sh` gives the local Argo CD admin password for first login.
 - `k8s/apps/kustomization.yaml` makes the root Argo CD application path syncable.
+- `k8s/apps/learning-whoami/base` provides a zero-dependency learning app for the first Gateway API and rollout drill.
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
 - `scripts/render_root_application.sh` renders the root Argo CD application using either `PLATFORM_GIT_REPO` or the configured `origin` remote.
 - `scripts/preflight_mac_lab.sh` checks whether this Mac is ready to host the local lab path.
@@ -24,6 +27,8 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - At least one stateless app deployment is reachable through an HTTPRoute.
 - The migration and rollback steps are captured in a runbook.
 - The bootstrap path clearly distinguishes Linux lab hosts from macOS control workstations.
+- The macOS path has a lighter first-day bootstrap so learning and experimentation can start before full observability and app sync are enabled.
+- A no-risk demo app is reachable through `whoami.lab.localhost` before any real business service migration begins.
 
 ## Verification
 

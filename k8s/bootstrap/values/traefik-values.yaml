@@ -5,6 +5,10 @@ providers:
     enabled: true
 gateway:
   enabled: true
+  listeners:
+    web:
+      namespacePolicy:
+        from: All
 ingressRoute:
   dashboard:
     enabled: false

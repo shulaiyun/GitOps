@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learning-whoami
+  labels:
+    app.kubernetes.io/name: learning-whoami
+    app.kubernetes.io/part-of: platform-learning
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: learning-whoami
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: learning-whoami
+        app.kubernetes.io/part-of: platform-learning
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.11.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20

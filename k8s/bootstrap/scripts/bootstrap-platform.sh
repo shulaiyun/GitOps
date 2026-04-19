@@ -15,16 +15,27 @@ done
 export PLATFORM_GIT_REPO="${PLATFORM_GIT_REPO:-}"
 export PLATFORM_GIT_REVISION="${PLATFORM_GIT_REVISION:-main}"
 export GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD:-change-me-now}"
+export BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-full}"
+export BOOTSTRAP_OBSERVABILITY="${BOOTSTRAP_OBSERVABILITY:-}"
+export BOOTSTRAP_ROOT_APP="${BOOTSTRAP_ROOT_APP:-}"
 
 if [[ -z "${PLATFORM_GIT_REPO}" ]] && git -C "${ROOT}" remote get-url origin >/dev/null 2>&1; then
   export PLATFORM_GIT_REPO="$(git -C "${ROOT}" remote get-url origin)"
+fi
+
+if [[ "${BOOTSTRAP_PROFILE}" == "mac-learning" ]]; then
+  export BOOTSTRAP_OBSERVABILITY="${BOOTSTRAP_OBSERVABILITY:-0}"
+  export BOOTSTRAP_ROOT_APP="${BOOTSTRAP_ROOT_APP:-0}"
+else
+  export BOOTSTRAP_OBSERVABILITY="${BOOTSTRAP_OBSERVABILITY:-1}"
+  export BOOTSTRAP_ROOT_APP="${BOOTSTRAP_ROOT_APP:-1}"
 fi
 
 kubectl apply -f "${MANIFESTS_DIR}/namespaces.yaml"
 
 kubectl apply -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml"
 
-kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+kubectl apply --server-side --force-conflicts -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
 
 helm repo add jetstack https://charts.jetstack.io >/dev/null 2>&1 || true
 helm repo add external-secrets https://charts.external-secrets.io >/dev/null 2>&1 || true
@@ -44,17 +55,23 @@ helm upgrade --install traefik traefik/traefik \
   --namespace traefik \
   -f "${VALUES_DIR}/traefik-values.yaml"
 
-helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
-  --namespace observability \
-  -f "${VALUES_DIR}/kube-prometheus-stack-values.yaml" \
-  --set grafana.adminPassword="${GRAFANA_ADMIN_PASSWORD}"
+if [[ "${BOOTSTRAP_OBSERVABILITY}" == "1" ]]; then
+  helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+    --namespace observability \
+    -f "${VALUES_DIR}/kube-prometheus-stack-values.yaml" \
+    --set grafana.adminPassword="${GRAFANA_ADMIN_PASSWORD}"
 
-helm upgrade --install loki grafana/loki \
-  --namespace observability \
-  -f "${VALUES_DIR}/loki-values.yaml"
+  helm upgrade --install loki grafana/loki \
+    --namespace observability \
+    -f "${VALUES_DIR}/loki-values.yaml"
+else
+  echo "BOOTSTRAP_OBSERVABILITY=${BOOTSTRAP_OBSERVABILITY}; skipping kube-prometheus-stack and Loki."
+fi
 
-if [[ -n "${PLATFORM_GIT_REPO}" ]]; then
+if [[ "${BOOTSTRAP_ROOT_APP}" == "1" && -n "${PLATFORM_GIT_REPO}" ]]; then
   envsubst <"${MANIFESTS_DIR}/root-application.template.yaml" | kubectl apply -f -
+elif [[ "${BOOTSTRAP_ROOT_APP}" != "1" ]]; then
+  echo "BOOTSTRAP_ROOT_APP=${BOOTSTRAP_ROOT_APP}; skipping root Argo CD application bootstrap."
 else
   echo "PLATFORM_GIT_REPO is not set; skipping root Argo CD application bootstrap."
 fi

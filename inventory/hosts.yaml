@@ -1,0 +1,130 @@
+schema_version: 1
+last_reviewed: 2026-04-19
+hosts:
+  - id: mac-local
+    role: workstation-and-local-runtime
+    host_kind: macos
+    owner: shulai
+    addresses:
+      - localhost
+    resources:
+      cpu_cores: 10
+      memory_gib: 16
+      disk_free_gib_approx: 226
+    runtimes:
+      - type: colima-docker
+        cpu_cores: 4
+        memory_gib: 8
+        disk_gib: 100
+    compose_projects:
+      - slothcloud
+      - sloth-convoy
+      - sloth-xboard
+      - cliproxyapi-main
+      - platform-core
+    host_processes:
+      - name: openclaw-gateway
+        ports:
+          - "127.0.0.1:18789"
+          - "127.0.0.1:18791"
+        notes: "OpenClaw host-level gateway process, not a Docker container."
+      - name: ollama
+        ports:
+          - "127.0.0.1:11434"
+        notes: "Local model serving runtime."
+    out_of_scope_local_processes:
+      - xray
+      - adb
+      - vendor device sync services
+    notes: "Main Sloth Cloud local business runtime currently lives here. Docker-published ports appear on macOS through the Colima forwarding layer."
+
+  - id: pve-source-physical
+    role: vps-substrate-and-experiment-host
+    host_kind: proxmox-ve
+    owner: shulai
+    addresses:
+      - 192.168.16.115
+    resources:
+      cpu_threads: 32
+      memory_gib_approx: 15
+      root_disk_total_gib: 94
+      root_disk_free_gib_approx: 75
+      local_lvm_free_gib_approx: 338
+    host_services:
+      - name: pveproxy
+        ports: [8006]
+      - name: spiceproxy
+        ports: [3128]
+      - name: ssh
+        ports: [22]
+      - name: pvedaemon
+        ports: ["127.0.0.1:85"]
+      - name: tailscaled
+        notes: "Tailscale node agent is active."
+    virtualization:
+      running_vms:
+        - vmid: 100455008
+          name: shu
+          guest_ip: 192.168.16.235
+          cpu_cores: 2
+          memory_gib: 2
+          disk_gib: 40
+          observed_state: "Ubuntu 22.04 guest with default nginx page; Docker not installed."
+          disk_used_gib_approx: 4.36
+      stopped_vms:
+        - vmid: 416634378
+          name: shu
+          planned_ips: [192.168.16.220, 192.168.16.221, 192.168.16.222]
+          cpu_cores: 4
+          memory_gib: 6
+          disk_gib: 80
+          observed_state: "Read-only disk inspection found Linux root filesystem but no meaningful Docker business payload."
+          disk_used_gib_approx: 8.4
+      running_lxc_count: 0
+    notes: "This machine is the physical VPS substrate for the Sloth Cloud business. It is not the same thing as the local Docker application runtime."
+
+  - id: xboard-prod-remote
+    role: remote-production-host
+    host_kind: debian-linux
+    owner: shulai
+    addresses:
+      - "38.80.189.137:19575"
+    resources:
+      memory_gib_approx: 1.9
+      root_disk_total_gib: 40
+      root_disk_used_gib_approx: 28
+      root_disk_free_gib_approx: 11
+    compose_projects:
+      - v2board
+      - cliproxyapi-main
+    containers:
+      - name: v2board-xboard-1
+        image: ghcr.io/cedar2025/xboard:latest
+        memory_used_mib_approx: 551
+      - name: v2board-redis-1
+        image: v2board-redis
+        memory_used_mib_approx: 8
+      - name: cli-proxy-api
+        image: cliproxyapi-local:latest
+        memory_used_mib_approx: 21
+    host_services:
+      - name: nginx
+        ports: [80, 443, 887, 888]
+      - name: mysqld
+        ports: [3306]
+      - name: php-fpm
+        ports: [7001]
+      - name: V2bX
+        ports: [8443]
+      - name: sloth-gateway
+        ports: [8787]
+      - name: ssh
+        ports: [19575]
+    data_paths:
+      - path: /root/v2board
+        size_approx: 212M
+        notes: "Contains .env, overrides, theme, and .docker data."
+      - path: /opt/shulai-VPN/CLIProxyAPI-main
+        size_approx: 8.7M
+        notes: "Remote CLI proxy stack with config, logs, and auth data."
+    notes: "Production Xboard depends on both Docker containers and host-level services such as nginx, MySQL, php-fpm, and V2bX."

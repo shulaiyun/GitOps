@@ -24,6 +24,7 @@ ruby scripts/check_inventory_coverage.rb
 
 - `inventory/services.yaml`
 - `inventory/compose-projects.yaml` when a new compose project appears
+- `inventory/hosts.yaml` when service placement or host topology changes
 - `inventory/uptime-targets.yaml` when the service needs uptime monitoring
 
 4. Update the matching phase file with:

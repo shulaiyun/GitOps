@@ -4,7 +4,7 @@
 
 ## What lives here
 
-- `inventory/`: current service inventory, compose project map, monitor targets
+- `inventory/`: current service inventory, compose project map, monitor targets, and host topology
 - `environments/`: environment contracts for the current compose estate and the target K3s lab
 - `tenants/`: customer delivery templates and tenancy defaults
 - `adr/`: architecture decisions that lock in important choices

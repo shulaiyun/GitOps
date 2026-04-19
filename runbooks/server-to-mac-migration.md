@@ -12,6 +12,33 @@ GitOps: use Git as the single source of truth for deployment changes.
 k3d: a tool that runs K3s clusters inside Docker.
 K3s: a lightweight Kubernetes distribution.
 
+## Topology correction as of 2026-04-19
+
+The service estate is split across three different runtime surfaces:
+
+- Local Mac:
+  - `slothcloud`
+  - `sloth-convoy`
+  - local `sloth-xboard`
+  - local `cliproxyapi-main`
+  - `platform-core`
+  - host-level `openclaw-gateway`
+- Physical server `192.168.16.115`:
+  - the `PVE` hypervisor that backs the VPS business substrate
+  - not the same thing as the local Docker application runtime
+- Remote host `38.80.189.137:19575`:
+  - production `xboard`
+  - remote `cliproxyapi-main`
+  - host-level `nginx`, `mysqld`, `php-fpm`, `V2bX`, and `sloth-gateway`
+
+Because of that, a full "move everything to the Mac" effort is not a single lift-and-shift job. It is really two different decisions:
+
+1. whether the application runtimes should move to the Mac
+2. whether the `PVE` virtualization substrate should move to the Mac
+
+The first is feasible for self-use and internal validation.
+The second is not a good long-term move.
+
 ## Verified findings as of 2026-04-19
 
 ### Local Mac
@@ -28,20 +55,38 @@ K3s: a lightweight Kubernetes distribution.
   - Active containers memory use at the sampling point: about `2793 MiB`
   - Docker images: about `35.65 GiB`
   - Build cache: about `32.57 GiB`
+- Current local application data footprint:
+  - `sloth-cloud` MariaDB: about `172M`
+  - `sloth-cloud` Redis: about `49M`
+  - `Paymenter` storage: about `26M`
+  - `sloth-convoy` MySQL volume: about `293.9M`
+  - `sloth-convoy` Redis volume: about `64M`
+  - local `CLIProxy` auths and logs: under `200K`
+  - local `OpenClaw` state directory: about `69M`
+- Additional host-level services:
+  - `openclaw-gateway` on `127.0.0.1:18789` and `127.0.0.1:18791`
+  - `ollama` on `127.0.0.1:11434`
 
 Interpretation:
 - The Mac can carry the current Compose business stack.
 - The Mac can also carry a local K3s lab, but only if we treat it as a local validation platform, not as a long-running customer production server.
 - If Compose business services and a full observability-heavy K3s lab run together, the current Colima `8 GiB` memory limit is too tight.
+- The currently measured local application data footprint is still comfortably below `1 GiB`, so disk space is not the immediate blocker.
 
 ### Server `192.168.16.115`
 
-- The host is a `PVE` virtualization server, not the direct Docker business host.
+- The host is a `PVE` virtualization server.
+- For the Sloth Cloud business, this machine matters because it is the VPS substrate, even though it is not the same thing as the local application Docker host.
 - Host resources:
   - CPU threads reported: `32`
   - Memory: about `15 GiB`
   - Root disk: `94 GiB`, free about `75 GiB`
   - `local-lvm` thin storage free: about `338 GiB`
+- Host services observed:
+  - `pveproxy` on `8006`
+  - `spiceproxy` on `3128`
+  - `ssh` on `22`
+  - `pvedaemon` on `127.0.0.1:85`
 
 ### VM inspection results
 
@@ -67,14 +112,52 @@ Interpretation:
     - No `docker-compose.yml`, `compose.yaml`, or current business project traces were found in the first-pass search
 
 Interpretation:
-- Based on the verified inspection, this PVE host does not appear to contain the currently active Docker business estate that is represented in `platform-control`.
-- That means a full "server to Mac" migration cannot yet be defined as a literal lift from this PVE host, because the real source of the current business stack has not been identified here.
+- The PVE host is part of the business platform, but in the role of virtualization substrate, not local application Docker runtime.
+- Migrating this host to the Mac would mean replacing the VPS substrate itself, which is not equivalent to migrating a few Compose applications.
+
+### Remote `xboard` production host `38.80.189.137:19575`
+
+- Host resources:
+  - Memory: about `1.9 GiB`
+  - Root disk: `40 GiB`, used about `28 GiB`, free about `11 GiB`
+- Docker projects:
+  - `v2board`
+  - `cliproxyapi-main`
+- Docker containers:
+  - `v2board-xboard-1`
+  - `v2board-redis-1`
+  - `cli-proxy-api`
+- Host-level services:
+  - `nginx` on `80`, `443`, `887`, `888`
+  - `mysqld` on `3306`
+  - `php` on `7001`
+  - `V2bX` on `8443`
+  - `sloth-gateway` on `8787`
+  - `ssh` on `19575`
+- Data paths:
+  - `/root/v2board` about `212M`
+  - `/opt/shulai-VPN/CLIProxyAPI-main` about `8.7M`
+  - `/www/server/data` about `295M`
+  - `/usr/local/V2bX` about `118M`
+  - `/opt/shulai-VPN/sloth-gateway` about `41M`
+
+Interpretation:
+- Remote production `xboard` is a hybrid host.
+- It depends on both Docker and host-level services.
+- Migrating it to the Mac is possible for self-use or internal validation, but it is not a trivial "copy two containers" move.
 
 ## Decision
 
 ### Can the Mac host everything?
 
-Yes, but only in a limited sense:
+Yes, but only in a limited sense.
+
+What can move:
+- the local application Compose estate that already runs on the Mac
+- the remote `xboard` application layer and remote `cliproxy` layer
+
+What should not be collapsed into the Mac as the final steady state:
+- the `PVE` virtualization substrate used for VPS delivery
 
 - Suitable:
   - self-use
@@ -102,6 +185,7 @@ Recommended Colima target:
 Notes:
 - This is the most realistic path if you want the Mac to carry business services.
 - Databases can live here for self-use, but only with disciplined backups and explicit downtime acceptance.
+- This profile can also absorb the remote `xboard` production host workload if you accept that the result is local-only and not customer-grade production.
 
 #### Profile B: Mac as Compose business host plus local K3d lab
 
@@ -130,23 +214,14 @@ Reason:
 
 ## Migration prerequisite
 
-Before any real migration starts, identify the real source host of the business stack.
+Before any real migration starts, confirm the exact source data paths on each source host.
 
 What is still missing:
-- the actual machine or VM that currently runs:
-  - `slothcloud`
-  - `sloth-convoy`
-  - `sloth-xboard`
-  - `cliproxyapi-main`
-- direct in-guest measurement of:
-  - database size
-  - bind mount size
-  - upload/assets size
-  - Redis persistence size
-  - cron jobs
-  - reverse proxy config
+- exact application data sizes for the local `slothcloud` and `sloth-convoy` stacks
+- exact MySQL data size and host-level config size on the remote `xboard` production host
+- explicit decision on whether the `PVE` substrate is staying remote, or only the application layer is moving
 
-Without that source host, the safest thing we can define now is the Mac-side target preparation and the application-level migration flow.
+Without those size measurements, the safest thing we can define now is the Mac-side target preparation and the application-layer migration flow.
 
 ## Migration flow
 
@@ -196,6 +271,11 @@ docker builder prune -af
 ### Phase 3: Export from the source host
 
 Use application-level export, not whole-VM lift-and-shift, unless there is a hard reason to preserve the entire OS image.
+
+Important split:
+- local `slothcloud` and `sloth-convoy` already live on the Mac, so there is no server-to-Mac copy step for them
+- remote `xboard` production does have a real host-to-Mac copy step
+- the `PVE` VPS substrate should stay out of this migration unless you are intentionally replacing the whole virtualization layer
 
 Export checklist:
 - Compose files and `.env`
@@ -284,12 +364,13 @@ Rollback actions:
 
 Right now, the best next move is:
 
-1. treat the Mac as the new quiet single-host Compose platform first
+1. treat the Mac as the quiet single-host application platform first
 2. do not move the full Kubernetes production idea onto the Mac at the same time
 3. keep the local `k3d` lab only for GitOps and first stateless migration drills
-4. identify the true source host of the business data before attempting any server migration
+4. move remote `xboard` only after its host MySQL, nginx, php, `V2bX`, and `cliproxy` dependencies are exported explicitly
+5. keep the `PVE` VPS substrate on dedicated Linux infrastructure instead of collapsing it onto the laptop
 
 This keeps the migration shape realistic:
 - business runtime can move to the Mac
 - Kubernetes can still be rehearsed locally
-- customer production does not get tied to a laptop
+- customer production and VPS substrate do not get tied to a laptop

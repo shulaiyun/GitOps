@@ -10,9 +10,11 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 
 - `k8s/bootstrap/scripts/install-k3s.sh` installs K3s with Traefik disabled.
 - `k8s/bootstrap/scripts/bootstrap-platform.sh` bootstraps Argo CD, cert-manager, External Secrets, Traefik Gateway, kube-prometheus-stack, and Loki.
+- `k8s/bootstrap/scripts/create-k3d-cluster.sh` creates a local macOS-friendly K3s lab by using k3d on top of Docker.
 - `k8s/apps/kustomization.yaml` makes the root Argo CD application path syncable.
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
 - `scripts/render_root_application.sh` renders the root Argo CD application using either `PLATFORM_GIT_REPO` or the configured `origin` remote.
+- `scripts/preflight_mac_lab.sh` checks whether this Mac is ready to host the local lab path.
 - `runbooks/sloth-cloud-api-k3s-migration.md` captures the first app migration path.
 
 ## Done definition
@@ -38,6 +40,7 @@ kubectl get pods -A
 ## Next entry point
 
 Use the configured Git remote to bootstrap a Linux K3s lab, then migrate `sloth-cloud-api` first.
+For a quieter local path, bootstrap the macOS lab with k3d first, then migrate `sloth-cloud-api`.
 
 ## Open questions
 

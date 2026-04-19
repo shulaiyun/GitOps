@@ -25,6 +25,7 @@
 - `k8s/apps/kustomization.yaml` and `k8s/apps/sloth-cloud-api/lab` now provide the first real GitOps-syncable app path.
 - The live machine still runs the business services on Compose. K3s is prepared but intentionally not installed by default on this host.
 - GitOps means Git is the single source of truth for platform changes, and Argo CD is the controller that syncs those Git changes into Kubernetes.
+- macOS can also host a local lab by using Colima plus k3d, which lets us rehearse the Kubernetes path without using the remote Linux server.
 
 ## Recommended workflow
 
@@ -67,5 +68,13 @@ Prepare the K3s lab host:
 ```bash
 bash scripts/preflight_k3s_lab.sh
 bash k8s/bootstrap/scripts/install-k3s.sh
+bash k8s/bootstrap/scripts/bootstrap-platform.sh
+```
+
+Prepare the macOS local lab:
+
+```bash
+bash scripts/preflight_mac_lab.sh
+bash k8s/bootstrap/scripts/create-k3d-cluster.sh
 bash k8s/bootstrap/scripts/bootstrap-platform.sh
 ```

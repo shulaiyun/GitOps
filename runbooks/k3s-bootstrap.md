@@ -5,6 +5,8 @@
 Stand up a separate K3s lab for platform validation without disturbing the compose-based live estate.
 K3s: a lightweight Kubernetes distribution used here as the first lab platform, not the final production substrate.
 
+For a quiet local rehearsal on macOS, use `runbooks/mac-local-lab.md` instead of this Linux-node runbook.
+
 ## Prerequisites
 
 - Use a separate machine or VM from the current compose production-like host.

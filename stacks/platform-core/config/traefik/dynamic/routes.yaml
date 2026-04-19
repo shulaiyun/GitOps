@@ -1,0 +1,51 @@
+http:
+  routers:
+    sloth-cloud-web:
+      rule: Host(`cloud.localhost`)
+      entryPoints: [web]
+      service: sloth-cloud-web
+    sloth-cloud-api:
+      rule: Host(`cloud-api.localhost`)
+      entryPoints: [web]
+      service: sloth-cloud-api
+    sloth-cloud-paymenter:
+      rule: Host(`paymenter.localhost`)
+      entryPoints: [web]
+      service: sloth-cloud-paymenter
+    sloth-convoy-web:
+      rule: Host(`convoy.localhost`)
+      entryPoints: [web]
+      service: sloth-convoy-web
+    sloth-xboard-web:
+      rule: Host(`xboard.localhost`)
+      entryPoints: [web]
+      service: sloth-xboard-web
+    cli-proxy-api:
+      rule: Host(`cliproxy.localhost`)
+      entryPoints: [web]
+      service: cli-proxy-api
+  services:
+    sloth-cloud-web:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:13000
+    sloth-cloud-api:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:14000
+    sloth-cloud-paymenter:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:18080
+    sloth-convoy-web:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:18181
+    sloth-xboard-web:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:7001
+    cli-proxy-api:
+      loadBalancer:
+        servers:
+          - url: http://host.docker.internal:8085

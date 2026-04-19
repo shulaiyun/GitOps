@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sloth-cloud-api
+  labels:
+    app.kubernetes.io/name: sloth-cloud-api
+    app.kubernetes.io/part-of: sloth-cloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sloth-cloud-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sloth-cloud-api
+        app.kubernetes.io/part-of: sloth-cloud
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/replace-me/sloth-cloud-api:0.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4000
+              name: http
+          env:
+            - name: PORT
+              value: "4000"
+            - name: MANAGED_APP_ENABLED
+              value: "true"
+            - name: MANAGED_APP_DRIVER
+              value: "in-cluster"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20

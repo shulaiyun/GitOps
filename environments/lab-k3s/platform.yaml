@@ -1,0 +1,31 @@
+schema_version: 1
+environment: lab-k3s
+status: prepared
+cluster_type: k3s
+dns_strategy: gateway-api-hosts
+storage_class: local-path-initial
+secret_backend: external-secrets
+ingress_controller: traefik-gateway
+observability_stack:
+  gitops: argocd
+  metrics: kube-prometheus-stack
+  logs: loki
+  certificates: cert-manager
+backup_policy:
+  mode: runbook-before-stateful-migration
+  stateful_services:
+    - none-until-restore-drills-pass
+tenant_mode: namespace-first
+bootstrap_order:
+  - k3s
+  - helm
+  - argocd
+  - cert-manager
+  - external-secrets
+  - traefik-gateway
+  - kube-prometheus-stack
+  - loki
+  - first-app-migration
+notes:
+  - "This environment is intentionally separate from the current compose production host."
+  - "The first migration targets are sloth-cloud-api and sloth-cloud-web."

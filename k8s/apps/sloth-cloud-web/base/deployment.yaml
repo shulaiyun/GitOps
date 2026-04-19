@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sloth-cloud-web
+  labels:
+    app.kubernetes.io/name: sloth-cloud-web
+    app.kubernetes.io/part-of: sloth-cloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sloth-cloud-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sloth-cloud-web
+        app.kubernetes.io/part-of: sloth-cloud
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/replace-me/sloth-cloud-web:0.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20

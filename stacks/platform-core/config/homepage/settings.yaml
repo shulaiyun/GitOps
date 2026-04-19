@@ -1,0 +1,13 @@
+title: Sloth Platform Control
+theme: dark
+color: slate
+headerStyle: clean
+quicklaunch:
+  searchDescriptions: true
+layout:
+  Business Services:
+    style: row
+    columns: 2
+  Platform:
+    style: row
+    columns: 2

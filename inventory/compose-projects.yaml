@@ -1,0 +1,43 @@
+schema_version: 1
+last_reviewed: 2026-04-18
+compose_projects:
+  - id: slothcloud
+    project: sloth-cloud
+    status: running
+    owner: shulai
+    compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+    working_dir: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud
+    adoption_status: active-legacy
+    notes: "Primary managed hosting storefront and operator lane. Contains cross-project dependency on sloth-convoy-net."
+  - id: sloth-convoy
+    project: sloth-convoy
+    status: running
+    owner: shulai
+    compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
+    working_dir: /Users/shulai/Documents/New project/vps/deploy/convoy
+    adoption_status: active-legacy
+    notes: "Panel, workers, DB, Redis, and Caddy runtime for Convoy-managed services."
+  - id: sloth-xboard
+    project: sloth-xboard
+    status: running
+    owner: shulai
+    compose_file: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/compose.yaml
+    working_dir: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master
+    adoption_status: active-legacy
+    notes: "VPN panel stack with Redis-backed app, Horizon, and websocket components."
+  - id: cliproxyapi-main
+    project: cli-proxy-api
+    status: running
+    owner: shulai
+    compose_file: /Users/shulai/Documents/New project/CLIProxyAPI-main/docker-compose.yml
+    working_dir: /Users/shulai/Documents/New project/CLIProxyAPI-main
+    adoption_status: active-legacy
+    notes: "Local internal API aggregator; bound to localhost-only ports."
+  - id: platform-core
+    project: platform-core
+    status: partially-running
+    owner: shulai
+    compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+    working_dir: /Users/shulai/Documents/New project/platform-control/stacks/platform-core
+    adoption_status: managed
+    notes: "Homepage and Beszel are live. Traefik, Dockge, Uptime Kuma, and the Beszel agent remain staged in the same compose file."

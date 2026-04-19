@@ -1,0 +1,78 @@
+schema_version: 1
+last_reviewed: 2026-04-18
+checks:
+  - id: sloth-cloud-web
+    name: Sloth Cloud Web
+    type: http
+    target: http://127.0.0.1:13000/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, public, phase-0]
+  - id: sloth-cloud-api
+    name: Sloth Cloud API
+    type: http
+    target: http://127.0.0.1:14000/api/v1/health
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, api, phase-0]
+  - id: sloth-cloud-paymenter
+    name: Sloth Cloud Paymenter
+    type: http
+    target: http://127.0.0.1:18080/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, storefront, phase-0]
+  - id: sloth-convoy-web
+    name: Sloth Convoy Web
+    type: http
+    target: http://127.0.0.1:18181/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, panel, phase-0]
+  - id: sloth-xboard-web
+    name: Sloth Xboard Web
+    type: http
+    target: http://127.0.0.1:7001/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, panel, phase-0]
+  - id: sloth-xboard-ws
+    name: Sloth Xboard WS
+    type: tcp
+    target: 127.0.0.1:8076
+    interval_seconds: 60
+    tags: [business, websocket, phase-0]
+  - id: cli-proxy-api
+    name: CLI Proxy API
+    type: tcp
+    target: 127.0.0.1:8085
+    interval_seconds: 60
+    tags: [internal, tool, phase-0]
+  - id: platform-homepage
+    name: Platform Homepage
+    type: http
+    target: http://127.0.0.1:15002/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [platform, planned]
+  - id: platform-dockge
+    name: Platform Dockge
+    type: http
+    target: http://127.0.0.1:15001/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [platform, planned]
+  - id: platform-uptime-kuma
+    name: Platform Uptime Kuma
+    type: http
+    target: http://127.0.0.1:15003/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [platform, planned]
+  - id: platform-beszel-hub
+    name: Platform Beszel Hub
+    type: http
+    target: http://127.0.0.1:15004/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [platform, planned]

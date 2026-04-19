@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sloth-cloud-web
+  labels:
+    app.kubernetes.io/name: sloth-cloud-web
+spec:
+  selector:
+    app.kubernetes.io/name: sloth-cloud-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

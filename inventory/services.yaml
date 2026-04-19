@@ -1,0 +1,598 @@
+schema_version: 1
+last_reviewed: 2026-04-18
+services:
+  - id: sloth-cloud-web
+    status: running
+    project: sloth-cloud
+    compose_project: slothcloud
+    kind: stateless
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:13000
+        - http://127.0.0.1:3000
+      planned_hosts:
+        - http://cloud.localhost:15080
+    ports:
+      - host: 13000
+        container: 80
+        protocol: tcp
+      - host: 3000
+        container: 80
+        protocol: tcp
+    volumes: []
+    networks: [sloth-cloud-net]
+    dependencies: [sloth-cloud-api, sloth-cloud-proxy-relay]
+    data_class: stateless
+    migration_class: first-batch-k8s
+    customer_visibility: managed
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+      compose_service: sloth-cloud-web
+    notes: "Primary Sloth Cloud storefront and customer UI."
+  - id: sloth-cloud-api
+    status: running
+    project: sloth-cloud
+    compose_project: slothcloud
+    kind: stateless
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:14000
+      planned_hosts:
+        - http://cloud-api.localhost:15080
+    ports:
+      - host: 14000
+        container: 4000
+        protocol: tcp
+    volumes:
+      - /Users/shulai/Documents/New project/vps/runtime/env/api.env:/app/apps/api/.env
+      - /Users/shulai/Documents/New project/vps/runtime/data/operator:/app/runtime/data/operator
+      - /Users/shulai/Documents/New project/vps/runtime/data/kubeconfig:/var/runtime/kubeconfig:ro
+    networks: [sloth-cloud-net, sloth-convoy-net]
+    dependencies: [sloth-cloud-paymenter, sloth-cloud-proxy-relay]
+    data_class: stateless
+    migration_class: first-batch-k8s
+    customer_visibility: managed
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+      compose_service: sloth-cloud-api
+    notes: "Fastify API with /api/v1/health endpoint. First Kubernetes migration candidate."
+  - id: sloth-cloud-paymenter
+    status: running
+    project: sloth-cloud
+    compose_project: slothcloud
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:18080
+      planned_hosts:
+        - http://paymenter.localhost:15080
+    ports:
+      - host: 18080
+        container: 80
+        protocol: tcp
+    volumes:
+      - /Users/shulai/Documents/New project/vps/runtime/env/paymenter.env:/var/www/html/.env
+      - /Users/shulai/Documents/New project/vps/runtime/data/paymenter/storage:/var/www/html/storage
+      - /Users/shulai/Documents/New project/vps/runtime/data/provisioning:/var/runtime/data/provisioning
+    networks: [sloth-cloud-net, sloth-convoy-net]
+    dependencies: [sloth-cloud-db, sloth-cloud-redis, sloth-cloud-proxy-relay]
+    data_class: recoverable-state
+    migration_class: last-batch-k8s
+    customer_visibility: managed
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+      compose_service: sloth-cloud-paymenter
+    notes: "App layer depends on local storage and database; delay until persistent volume strategy is defined."
+  - id: sloth-cloud-db
+    status: running
+    project: sloth-cloud
+    compose_project: slothcloud
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - /Users/shulai/Documents/New project/vps/runtime/data/mariadb:/var/lib/mysql
+    networks: [sloth-cloud-net]
+    dependencies: []
+    data_class: core-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+      compose_service: sloth-cloud-db
+    notes: "Core MariaDB state. Must pass backup and restore drills before any migration."
+  - id: sloth-cloud-redis
+    status: running
+    project: sloth-cloud
+    compose_project: slothcloud
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - /Users/shulai/Documents/New project/vps/runtime/data/redis:/data
+    networks: [sloth-cloud-net]
+    dependencies: []
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+      compose_service: sloth-cloud-redis
+    notes: "Backs storefront and operator runtime. Can move only after persistence and rebuild policy are explicit."
+  - id: sloth-cloud-proxy-relay
+    status: running
+    project: sloth-cloud
+    compose_project: slothcloud
+    kind: stateless
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - tcp://127.0.0.1:12335
+      planned_hosts: []
+    ports:
+      - host: 12335
+        container: 12335
+        protocol: tcp
+    volumes: []
+    networks: [host]
+    dependencies: []
+    data_class: stateless
+    migration_class: first-batch-k8s
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/sloth-cloud/docker-compose.yml
+      compose_service: sloth-cloud-proxy-relay
+    notes: "Host-network TCP relay for outbound proxying. Keep simple, but standardize early."
+  - id: sloth-convoy-web
+    status: running
+    project: sloth-convoy
+    compose_project: sloth-convoy
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:18181
+      planned_hosts:
+        - http://convoy.localhost:15080
+    ports:
+      - host: 18181
+        container: 80
+        protocol: tcp
+    volumes:
+      - sloth-convoy-caddy-config:/config
+      - sloth-convoy-caddy-data:/data
+      - /Users/shulai/Documents/New project/vps/Convoy panel-develop/panel-develop:/var/www
+    networks: [sloth-convoy-net]
+    dependencies: [sloth-convoy-php]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: managed
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
+      compose_service: sloth-convoy-web
+    notes: "Caddy front end for Convoy. Bound source tree means packaging must be cleaned up before migration."
+  - id: sloth-convoy-php
+    status: running
+    project: sloth-convoy
+    compose_project: sloth-convoy
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - /Users/shulai/Documents/New project/vps/Convoy panel-develop/panel-develop:/var/www
+    networks: [sloth-convoy-net]
+    dependencies: [sloth-convoy-db, sloth-convoy-redis]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
+      compose_service: sloth-convoy-php
+    notes: "Runs migrations and local build steps on startup. Needs image hardening before K8s."
+  - id: sloth-convoy-workers
+    status: running
+    project: sloth-convoy
+    compose_project: sloth-convoy
+    kind: stateless
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - /Users/shulai/Documents/New project/vps/Convoy panel-develop/panel-develop:/var/www
+    networks: [sloth-convoy-net]
+    dependencies: [sloth-convoy-db, sloth-convoy-redis]
+    data_class: stateless
+    migration_class: first-batch-k8s
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
+      compose_service: sloth-convoy-workers
+    notes: "Worker lane is a good Kubernetes candidate once image build moves out of entrypoint."
+  - id: sloth-convoy-db
+    status: running
+    project: sloth-convoy
+    compose_project: sloth-convoy
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - sloth-convoy-db-data:/var/lib/mysql
+    networks: [sloth-convoy-net]
+    dependencies: []
+    data_class: core-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
+      compose_service: sloth-convoy-db
+    notes: "Core MySQL state. Keep on Compose until restore exercises pass."
+  - id: sloth-convoy-redis
+    status: running
+    project: sloth-convoy
+    compose_project: sloth-convoy
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - sloth-convoy-redis-data:/data
+    networks: [sloth-convoy-net]
+    dependencies: []
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
+      compose_service: sloth-convoy-redis
+    notes: "Redis cache and queue backend for Convoy."
+  - id: sloth-xboard-web
+    status: running
+    project: sloth-xboard
+    compose_project: sloth-xboard
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:7001
+      planned_hosts:
+        - http://xboard.localhost:15080
+    ports:
+      - host: 7001
+        container: 7001
+        protocol: tcp
+    volumes:
+      - sloth-xboard_redis-data:/data
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/.env:/www/.env
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/.docker/.data:/www/.docker/.data
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/theme/SlothPro:/www/theme/SlothPro:ro
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/theme/SlothPro:/www/public/theme/SlothPro:ro
+    networks: [sloth-xboard_default]
+    dependencies: [sloth-xboard-redis]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: private-deployable
+    source:
+      compose_file: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/compose.yaml
+      compose_service: web
+    notes: "App container includes many bind-mounted source overrides. Package cleanup is required before migration."
+  - id: sloth-xboard-horizon
+    status: running
+    project: sloth-xboard
+    compose_project: sloth-xboard
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - sloth-xboard_redis-data:/data
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/.env:/www/.env
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/.docker/.data:/www/.docker/.data
+    networks: [sloth-xboard_default]
+    dependencies: [sloth-xboard-redis]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/compose.yaml
+      compose_service: horizon
+    notes: "Queue worker bound to the same source tree as the web tier."
+  - id: sloth-xboard-ws
+    status: running
+    project: sloth-xboard
+    compose_project: sloth-xboard
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - ws://127.0.0.1:8076
+      planned_hosts:
+        - ws://xboard-ws.localhost:15080
+    ports:
+      - host: 8076
+        container: 8076
+        protocol: tcp
+    volumes:
+      - sloth-xboard_redis-data:/data
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/.env:/www/.env
+      - /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/.docker/.data:/www/.docker/.data
+    networks: [sloth-xboard_default]
+    dependencies: [sloth-xboard-redis]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: private-deployable
+    source:
+      compose_file: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/compose.yaml
+      compose_service: ws-server
+    notes: "Websocket worker should move only with the rest of the Xboard packaging cleanup."
+  - id: sloth-xboard-redis
+    status: running
+    project: sloth-xboard
+    compose_project: sloth-xboard
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - sloth-xboard_redis-data:/data
+    networks: [sloth-xboard_default]
+    dependencies: []
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/compose.yaml
+      compose_service: redis
+    notes: "Redis socket backend for Xboard."
+  - id: cli-proxy-api
+    status: running
+    project: cli-proxy-api
+    compose_project: cliproxyapi-main
+    kind: stateful
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:8085
+        - http://127.0.0.1:8317
+      planned_hosts:
+        - http://cliproxy.localhost:15080
+    ports:
+      - host: 8085
+        container: 8085
+        protocol: tcp
+      - host: 8317
+        container: 8317
+        protocol: tcp
+      - host: 1455
+        container: 1455
+        protocol: tcp
+      - host: 54545
+        container: 54545
+        protocol: tcp
+      - host: 51121
+        container: 51121
+        protocol: tcp
+      - host: 11451
+        container: 11451
+        protocol: tcp
+    volumes:
+      - /Users/shulai/Documents/New project/CLIProxyAPI-main/config.yaml:/CLIProxyAPI/config.yaml
+      - /Users/shulai/Documents/New project/CLIProxyAPI-main/auths:/root/.cli-proxy-api
+      - /Users/shulai/Documents/New project/CLIProxyAPI-main/logs:/CLIProxyAPI/logs
+    networks: [cliproxyapi-main_default]
+    dependencies: []
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/CLIProxyAPI-main/docker-compose.yml
+      compose_service: cli-proxy-api
+    notes: "Internal proxy runtime with many localhost-bound ports and on-disk auth/log state."
+  - id: platform-traefik
+    status: planned
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:15080
+      planned_hosts:
+        - http://traefik.localhost:15080
+    ports:
+      - host: 15080
+        container: 80
+        protocol: tcp
+      - host: 15443
+        container: 443
+        protocol: tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./stacks/platform-core/config/traefik/dynamic:/etc/traefik/dynamic:ro
+    networks: [platform-core]
+    dependencies: []
+    data_class: stateless
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+      compose_service: traefik
+    notes: "Shared edge for the current compose estate and the future K3s gateway mental model."
+  - id: platform-dockge
+    status: planned
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:15001
+      planned_hosts:
+        - http://dockge.localhost:15080
+    ports:
+      - host: 15001
+        container: 5001
+        protocol: tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /Users/shulai/Documents/New project/platform-control/stacks:/opt/stacks
+      - ./stacks/platform-core/data/dockge:/app/data
+    networks: [platform-core]
+    dependencies: [platform-traefik]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+      compose_service: dockge
+    notes: "Compose-first control plane. Existing legacy stacks stay discoverable while new stacks move under /platform-control/stacks."
+  - id: platform-homepage
+    status: running
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:15002
+      planned_hosts:
+        - http://home.localhost:15080
+    ports:
+      - host: 15002
+        container: 3000
+        protocol: tcp
+    volumes:
+      - ./stacks/platform-core/config/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [platform-core]
+    dependencies: [platform-traefik]
+    data_class: stateless
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+      compose_service: homepage
+    notes: "Human entry point for current and future platform services. Live on http://127.0.0.1:15002."
+  - id: platform-uptime-kuma
+    status: planned
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:15003
+      planned_hosts:
+        - http://uptime.localhost:15080
+    ports:
+      - host: 15003
+        container: 3001
+        protocol: tcp
+    volumes:
+      - ./stacks/platform-core/data/uptime-kuma:/app/data
+    networks: [platform-core]
+    dependencies: [platform-traefik]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+      compose_service: uptime-kuma
+    notes: "Black-box monitoring hub. Use inventory/uptime-targets.yaml as the desired monitor list."
+  - id: platform-beszel-hub
+    status: running
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:15004
+      planned_hosts:
+        - http://beszel.localhost:15080
+    ports:
+      - host: 15004
+        container: 8090
+        protocol: tcp
+    volumes:
+      - ./stacks/platform-core/data/beszel:/beszel_data
+      - ./stacks/platform-core/data/beszel-socket:/beszel_socket
+    networks: [platform-core]
+    dependencies: [platform-traefik]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+      compose_service: beszel
+    notes: "Monitoring hub. Live on http://127.0.0.1:15004. Agent is profile-gated until the hub token and key are issued."
+  - id: platform-beszel-agent
+    status: planned
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports:
+      - host: 45876
+        container: unix-or-host
+        protocol: tcp
+    volumes:
+      - ./stacks/platform-core/data/beszel-agent:/var/lib/beszel-agent
+      - ./stacks/platform-core/data/beszel-socket:/beszel_socket
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [host]
+    dependencies: [platform-beszel-hub]
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
+      compose_service: beszel-agent
+    notes: "Enable only after creating a hub token and public key pair in Beszel."

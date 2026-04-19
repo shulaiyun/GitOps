@@ -1,0 +1,39 @@
+schema_version: 1
+environment: lab-compose
+status: active
+cluster_type: compose
+dns_strategy: localhost-hostnames-via-traefik
+storage_class: host-bind-and-docker-volumes
+secret_backend: env-files-on-disk
+ingress_controller: traefik-compose
+observability_stack:
+  dashboards: homepage
+  uptime: uptime-kuma
+  resource_metrics: beszel
+backup_policy:
+  mode: manual-plus-targeted-runbooks
+  stateful_services:
+    - sloth-cloud-db
+    - sloth-cloud-redis
+    - sloth-convoy-db
+    - sloth-convoy-redis
+    - sloth-xboard-redis
+tenant_mode: internal-single-tenant
+service_registration_contract:
+  inventory_file: /Users/shulai/Documents/New project/platform-control/inventory/services.yaml
+  required_fields:
+    - id
+    - project
+    - kind
+    - runtime
+    - owner
+    - ingress
+    - ports
+    - volumes
+    - dependencies
+    - data_class
+    - migration_class
+    - customer_visibility
+notes:
+  - "This is the source of truth for the currently running machine."
+  - "No new docker run workloads are allowed; add them through a compose file under platform-control/stacks."

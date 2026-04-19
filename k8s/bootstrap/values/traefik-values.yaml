@@ -1,0 +1,23 @@
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesGateway:
+    enabled: true
+gateway:
+  enabled: true
+ingressRoute:
+  dashboard:
+    enabled: false
+ports:
+  web:
+    port: 8000
+    expose:
+      default: true
+    exposedPort: 80
+  websecure:
+    port: 8443
+    expose:
+      default: true
+    exposedPort: 443
+service:
+  type: LoadBalancer

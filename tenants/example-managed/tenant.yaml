@@ -1,0 +1,25 @@
+schema_version: 1
+tenant_id: example-managed
+display_name: Example Managed Tenant
+isolation_mode: namespace
+quota:
+  cpu: "4"
+  memory: 8Gi
+  storage: 50Gi
+  pods: 20
+domains:
+  - example.customer.sloth.local
+backup_tier: daily
+support_tier: business-hours
+allowed_services:
+  - sloth-cloud-web
+  - sloth-cloud-api
+  - sloth-convoy-workers
+delivery_contract:
+  monitoring: required
+  uptime_sla_target: 99.5
+  log_retention_days: 14
+  metrics_retention_days: 15
+notes:
+  - "Namespace is the default tenancy mode until a customer needs stronger isolation."
+  - "Move to vCluster or dedicated cluster only when justified by compliance, cost, or blast-radius concerns."

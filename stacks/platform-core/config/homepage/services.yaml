@@ -1,0 +1,35 @@
+- Business Services:
+    - Sloth Cloud Web:
+        href: http://cloud.localhost:15080
+        description: Storefront and customer UI.
+    - Sloth Cloud API:
+        href: http://cloud-api.localhost:15080
+        description: Fastify API health and runtime control plane.
+    - Sloth Cloud Paymenter:
+        href: http://paymenter.localhost:15080
+        description: Payment and provisioning app tier.
+    - Sloth Convoy:
+        href: http://convoy.localhost:15080
+        description: Convoy panel front end.
+    - Sloth Xboard:
+        href: http://xboard.localhost:15080
+        description: VPN panel front end.
+    - CLI Proxy API:
+        href: http://cliproxy.localhost:15080
+        description: Internal localhost-bound service via Traefik host proxy.
+- Platform:
+    - Homepage:
+        href: http://home.localhost:15080
+        description: Shared operations entry point.
+    - Dockge:
+        href: http://dockge.localhost:15080
+        description: Compose stack manager.
+    - Uptime Kuma:
+        href: http://uptime.localhost:15080
+        description: Black-box health checks.
+    - Beszel:
+        href: http://beszel.localhost:15080
+        description: Host and container metrics hub.
+    - Traefik Dashboard:
+        href: http://traefik.localhost:15080
+        description: Shared compose edge and routing view.

@@ -1,0 +1,6 @@
+.DS_Store
+inventory/runtime-snapshot.json
+stacks/platform-core/.env.local
+stacks/platform-core/data/
+stacks/platform-core/config/homepage/icons/
+stacks/platform-core/config/homepage/images/

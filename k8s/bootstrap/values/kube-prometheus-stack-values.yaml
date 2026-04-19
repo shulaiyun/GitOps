@@ -1,0 +1,12 @@
+grafana:
+  ingress:
+    enabled: false
+prometheus:
+  prometheusSpec:
+    retention: 15d
+alertmanager:
+  enabled: true
+kubeStateMetrics:
+  enabled: true
+nodeExporter:
+  enabled: true

@@ -1,0 +1,129 @@
+name: platform-core
+
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: platform-traefik
+    restart: unless-stopped
+    command:
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --serversTransport.insecureSkipVerify=true
+    ports:
+      - "${TRAEFIK_WEB_PORT:-15080}:80"
+      - "${TRAEFIK_WEBSECURE_PORT:-15443}:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik/dynamic:/etc/traefik/dynamic:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    networks:
+      - platform-core
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: Host(`traefik.localhost`)
+      traefik.http.routers.traefik.entrypoints: web
+      traefik.http.routers.traefik.service: api@internal
+
+  dockge:
+    image: louislam/dockge:1
+    container_name: platform-dockge
+    restart: unless-stopped
+    environment:
+      DOCKGE_STACKS_DIR: /opt/stacks
+    ports:
+      - "${DOCKGE_PORT:-15001}:5001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../:/opt/stacks
+      - ./data/dockge:/app/data
+    networks:
+      - platform-core
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.dockge.rule: Host(`dockge.localhost`)
+      traefik.http.routers.dockge.entrypoints: web
+      traefik.http.services.dockge.loadbalancer.server.port: "5001"
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: platform-homepage
+    restart: unless-stopped
+    environment:
+      PUID: "${PUID:-501}"
+      PGID: "${PGID:-20}"
+      HOMEPAGE_ALLOWED_HOSTS: "${HOMEPAGE_ALLOWED_HOSTS:-127.0.0.1:15002,localhost:15002,home.localhost:15080}"
+    ports:
+      - "${HOMEPAGE_PORT:-15002}:3000"
+    volumes:
+      - ./config/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - platform-core
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.homepage.rule: Host(`home.localhost`)
+      traefik.http.routers.homepage.entrypoints: web
+      traefik.http.services.homepage.loadbalancer.server.port: "3000"
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: platform-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "${UPTIME_KUMA_PORT:-15003}:3001"
+    volumes:
+      - ./data/uptime-kuma:/app/data
+    networks:
+      - platform-core
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.uptime.rule: Host(`uptime.localhost`)
+      traefik.http.routers.uptime.entrypoints: web
+      traefik.http.services.uptime.loadbalancer.server.port: "3001"
+
+  beszel:
+    image: henrygd/beszel:latest
+    container_name: platform-beszel-hub
+    restart: unless-stopped
+    environment:
+      APP_URL: "${BESZEL_APP_URL:-http://beszel.localhost:15080}"
+    ports:
+      - "${BESZEL_PORT:-15004}:8090"
+    volumes:
+      - ./data/beszel:/beszel_data
+      - ./data/beszel-socket:/beszel_socket
+    networks:
+      - platform-core
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.beszel.rule: Host(`beszel.localhost`)
+      traefik.http.routers.beszel.entrypoints: web
+      traefik.http.services.beszel.loadbalancer.server.port: "8090"
+
+  beszel-agent:
+    image: henrygd/beszel-agent:latest
+    container_name: platform-beszel-agent
+    restart: unless-stopped
+    profiles:
+      - agent
+    network_mode: host
+    volumes:
+      - ./data/beszel-agent:/var/lib/beszel-agent
+      - ./data/beszel-socket:/beszel_socket
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      LISTEN: "${BESZEL_AGENT_LISTEN:-/beszel_socket/beszel.sock}"
+      KEY: "${BESZEL_AGENT_KEY}"
+      HUB_URL: http://localhost:${BESZEL_PORT:-15004}
+      TOKEN: "${BESZEL_AGENT_TOKEN}"
+
+networks:
+  platform-core:
+    name: platform-core

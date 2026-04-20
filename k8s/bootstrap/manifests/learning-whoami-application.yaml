@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: learning-whoami
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/shulaiyun/GitOps.git
+    targetRevision: main
+    path: k8s/apps/learning-whoami/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sloth-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

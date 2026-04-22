@@ -1,17 +1,30 @@
 # Runbook: macOS Local Lab
 
-## Purpose
+## Purpose / 目的
 
 Run the platform lab on this Mac without using the noisy Linux server.
 This path is for local validation, GitOps rehearsal, and early migration drills.
 It is not the recommended long-running customer production substrate.
 
-Key terms:
+中文解释：
+
+这份手册对应的是“Mac 本地 Kubernetes 实验场”。
+它适合学习、演练、验证，不适合直接当长期生产底座。
+
+Key terms / 关键术语：
 Colima: a lightweight Linux virtual machine on macOS that provides the Docker runtime.
 k3d: a tool that runs K3s clusters inside Docker.
 K3s: a lightweight Kubernetes distribution.
 GitOps: use Git as the single source of truth for deployment changes.
 Argo CD: the controller that watches Git and syncs the cluster.
+
+中文解释：
+
+- Colima：Mac 上提供 Linux 容器运行环境的小虚拟机
+- k3d：在 Docker 里创建 K3s 集群的工具
+- K3s：轻量版 Kubernetes 发行版
+- GitOps：用 Git 管理集群期望状态
+- Argo CD：自动读取 Git 并把集群同步过去的控制器
 
 ## What this local Kubernetes cluster is for
 
@@ -207,7 +220,7 @@ Delete the demo when you are done:
 kubectl delete -k k8s/apps/learning-whoami/base
 ```
 
-## Argo CD local access
+## Argo CD local access / Argo CD 本地访问
 
 Get the first admin password:
 
@@ -237,6 +250,13 @@ What Argo CD is for in this lab:
 - compare desired state in Git with actual state in Kubernetes
 - sync changes without manually re-running `kubectl apply`
 - practice the later customer-ready GitOps workflow on a safe local cluster
+
+如果你更想先看界面，再回来看命令：
+
+```bash
+cd "/Users/shulai/Documents/New project/platform-control"
+cat runbooks/argocd-ui-learning-whoami-tour.md
+```
 
 ## First migration drill
 

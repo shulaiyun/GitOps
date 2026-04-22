@@ -1,8 +1,20 @@
 # Runbook: Learning Whoami GitOps Drill
 
-## Purpose
+## Purpose / 目的
 
 Use `learning-whoami` as the safest first GitOps drill on the Mac lab.
+
+中文解释：
+
+把 `learning-whoami` 当作第一套最安全的 GitOps 演练对象。
+它没有数据库、没有客户流量、没有复杂依赖，所以最适合用来理解 GitOps 到底是怎么工作的。
+
+如果你更想先从界面理解，再回来看命令，请先看：
+
+```bash
+cd "/Users/shulai/Documents/New project/platform-control"
+cat runbooks/argocd-ui-learning-whoami-tour.md
+```
 
 This drill teaches the full chain:
 
@@ -12,7 +24,7 @@ This drill teaches the full chain:
 - `ReplicaSet`: the rollout snapshot created by the Deployment
 - `Pod`: the running container instance
 
-Key terms:
+Key terms / 关键术语：
 
 - GitOps: use Git as the single source of truth for cluster changes.
 - Argo CD: the controller that watches Git and syncs Kubernetes to match it.
@@ -20,13 +32,21 @@ Key terms:
 - self-heal: Argo CD notices live drift and puts the cluster back to the Git state.
 - drift: someone changed the live cluster directly, so it no longer matches Git.
 
+中文解释：
+
+- GitOps：把 Git 作为部署配置的唯一事实源
+- Argo CD：盯着 Git 并把集群状态拉到 Git 所定义状态的控制器
+- sync：同步完成，说明 Git 和集群已经一致
+- self-heal：自愈，说明集群被手动改歪后，Argo CD 会按 Git 改回来
+- drift：漂移，说明集群当前状态和 Git 里的定义不一致
+
 ## Why this drill is safe
 
 - `learning-whoami` is stateless.
 - It has no database and no customer traffic.
 - It is already connected to `Argo CD` and healthy.
 
-## Baseline check
+## Baseline check / 基线检查
 
 ```bash
 cd "/Users/shulai/Documents/New project/platform-control"
@@ -36,13 +56,13 @@ kubectl get pods -n sloth-apps -l app.kubernetes.io/name=learning-whoami
 curl http://whoami.lab.localhost:16080 | sed -n '1,6p'
 ```
 
-Expected result:
+Expected result / 你应该看到的结果：
 
 - `Application` shows `Synced` and `Healthy`
 - `Deployment` shows `1/1`
 - one `Pod` is running
 
-## Drill Part 1: change Git and let Argo CD sync it
+## Drill Part 1: change Git and let Argo CD sync it / 第 1 部分：改 Git，让 Argo CD 自动同步
 
 Edit the desired replica count in Git:
 
@@ -99,7 +119,7 @@ kubectl annotate application learning-whoami -n argocd argocd.argoproj.io/refres
 That does not apply the manifests by itself.
 It only tells Argo CD to re-check Git now.
 
-## Drill Part 2: create drift and let Argo CD self-heal it
+## Drill Part 2: create drift and let Argo CD self-heal it / 第 2 部分：故意制造漂移，再看 Argo CD 自动修复
 
 Directly change the live cluster to the wrong value:
 
@@ -136,7 +156,7 @@ This is the core GitOps lesson:
 - but Git remains the truth
 - so Argo CD pulls the cluster back to the Git state
 
-## Useful inspection commands
+## Useful inspection commands / 实用查看命令
 
 See the Argo CD source and policy:
 
@@ -165,7 +185,7 @@ Look for:
 
 That annotation shows Argo CD is tracking this Deployment as part of the Application.
 
-## Optional rollback
+## Optional rollback / 可选回滚
 
 If you want the lab back to one replica, change Git again:
 
@@ -181,14 +201,14 @@ git commit -m "Scale learning-whoami back to 1 replica"
 git push origin main
 ```
 
-## Done definition
+## Done definition / 完成标准
 
 - You changed desired state in Git
 - Argo CD synced that change into the cluster
 - You created live drift
 - Argo CD self-healed the cluster back to the Git state
 
-## Live verification snapshot
+## Live verification snapshot / 本次实跑验证记录
 
 Verified on the Mac lab:
 

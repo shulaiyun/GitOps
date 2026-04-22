@@ -25,20 +25,26 @@ bash k8s/bootstrap/scripts/show-argocd-admin-password.sh
 ### 2. 打开本地端口转发
 
 ```bash
-kubectl -n argocd port-forward svc/argocd-server 18080:80
+cd "/Users/shulai/Documents/New project/platform-control"
+bash scripts/start_argocd_ui_port_forward.sh
 ```
 
 中文解释：
 
-- `kubectl`：Kubernetes 命令行工具
-- `-n argocd`：操作 `argocd` 这个命名空间（namespace，资源隔离空间）
-- `port-forward`：把集群里的服务临时转发到你本机
-- `svc/argocd-server`：要转发的目标服务
-- `18080:80`：把你电脑的 `18080` 端口转到集群里服务的 `80` 端口
+- 这条脚本会在本机启动一个临时访问入口
+- 默认用 `19080` 端口，避免和现有业务端口冲突
+- 脚本底层本质上仍然是在执行 `kubectl port-forward`
+- 这个命令要一直开着，所以请保留这个终端窗口不要关闭
+
+为什么不用以前的 `18080`：
+
+- 因为你的本机 `18080` 已经被现有业务占用了
+- 再用 `https://127.0.0.1:18080` 打开时，就可能看到 `ERR_SSL_PROTOCOL_ERROR`
+- 不是 Argo 坏了，而是浏览器连到了另一个不是 Argo 的服务
 
 ### 3. 浏览器打开
 
-- 地址：`https://127.0.0.1:18080`
+- 地址：`https://127.0.0.1:19080`
 - 用户名：`admin`
 - 密码：上一步脚本打印出来的值
 
@@ -46,6 +52,8 @@ kubectl -n argocd port-forward svc/argocd-server 18080:80
 
 - 第一次会提示证书不受信任，这在本地实验环境是正常的
 - 继续访问即可
+- 这个入口是临时的，Mac 睡眠、终端退出、Kubernetes 连接断开后，可能需要重新运行一次脚本
+- 不用的时候，在运行脚本的终端里按 `Ctrl+C` 即可关闭
 
 ## 登录后先看哪里
 

@@ -232,17 +232,26 @@ bash k8s/bootstrap/scripts/show-argocd-admin-password.sh
 Expose the web UI locally:
 
 ```bash
-kubectl -n argocd port-forward svc/argocd-server 18080:80
+cd "/Users/shulai/Documents/New project/platform-control"
+bash scripts/start_argocd_ui_port_forward.sh
 ```
 
 Then open:
 
-- `https://127.0.0.1:18080`
+- `https://127.0.0.1:19080`
 - username: `admin`
 - password: output from `show-argocd-admin-password.sh`
 
 Because this is a local lab endpoint, your browser will warn about the self-signed certificate.
 That is expected for the first local login.
+
+Keep that terminal open while you use the Argo CD page.
+
+To stop it later:
+
+```bash
+Ctrl+C
+```
 
 What Argo CD is for in this lab:
 

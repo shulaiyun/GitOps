@@ -247,6 +247,13 @@ cd "/Users/shulai/Documents/New project/platform-control"
 cat runbooks/sloth-cloud-api-k3s-migration.md
 ```
 
+For the safest first GitOps exercise before a real business migration:
+
+```bash
+cd "/Users/shulai/Documents/New project/platform-control"
+cat runbooks/learning-whoami-gitops-drill.md
+```
+
 ## Rollback and cleanup
 
 Delete the local cluster:

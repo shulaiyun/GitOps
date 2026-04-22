@@ -18,6 +18,7 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
 - `scripts/render_root_application.sh` renders the root Argo CD application using either `PLATFORM_GIT_REPO` or the configured `origin` remote.
 - `scripts/preflight_mac_lab.sh` checks whether this Mac is ready to host the local lab path.
+- `runbooks/learning-whoami-gitops-drill.md` captures the first end-to-end GitOps sync and self-heal drill.
 - `runbooks/sloth-cloud-api-k3s-migration.md` captures the first app migration path.
 
 ## Done definition
@@ -29,6 +30,7 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - The bootstrap path clearly distinguishes Linux lab hosts from macOS control workstations.
 - The macOS path has a lighter first-day bootstrap so learning and experimentation can start before full observability and app sync are enabled.
 - A no-risk demo app is reachable through `whoami.lab.localhost` before any real business service migration begins.
+- The first GitOps lesson is durable in-repo and proves both automated sync and self-heal behavior.
 
 ## Verification
 

@@ -87,6 +87,18 @@ Expected result:
 - `Deployment` moves from `1` replica to `2`
 - a second `Pod` appears
 
+Note:
+
+- Argo CD may take a short polling interval before it notices the new Git revision.
+- If you do not want to wait for the next poll, trigger a refresh check:
+
+```bash
+kubectl annotate application learning-whoami -n argocd argocd.argoproj.io/refresh=normal --overwrite
+```
+
+That does not apply the manifests by itself.
+It only tells Argo CD to re-check Git now.
+
 ## Drill Part 2: create drift and let Argo CD self-heal it
 
 Directly change the live cluster to the wrong value:
@@ -175,3 +187,12 @@ git push origin main
 - Argo CD synced that change into the cluster
 - You created live drift
 - Argo CD self-healed the cluster back to the Git state
+
+## Live verification snapshot
+
+Verified on the Mac lab:
+
+- Git commit `d97cca9` changed `replicas` from `1` to `2`
+- Argo CD moved through `OutOfSync -> Synced/Progressing -> Synced/Healthy`
+- a manual `kubectl scale ... --replicas=1` created drift
+- Argo CD self-healed the Deployment back to `2 desired / 2 ready`

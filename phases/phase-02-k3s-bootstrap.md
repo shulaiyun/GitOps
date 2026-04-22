@@ -44,6 +44,13 @@ ruby scripts/validate_k8s_manifests.rb
 kubectl get pods -A
 ```
 
+Live verification completed on the Mac lab:
+
+- `learning-whoami` Argo CD `Application` is `Synced` and `Healthy`
+- Git commit `d97cca9` changed the `Deployment` desired replicas from `1` to `2`
+- Argo CD reconciled that Git change into the cluster
+- a manual drift by `kubectl scale ... --replicas=1` was self-healed back to `2`
+
 ## Next entry point
 
 Use the configured Git remote to bootstrap a Linux K3s lab, then migrate `sloth-cloud-api` first.

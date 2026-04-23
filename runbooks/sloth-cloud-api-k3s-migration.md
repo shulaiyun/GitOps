@@ -24,6 +24,8 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 
 - Base manifests: `k8s/apps/sloth-cloud-api/base`
 - Lab overlay: `k8s/apps/sloth-cloud-api/lab`
+- Dedicated Argo CD application template: `k8s/bootstrap/manifests/sloth-cloud-api-lab-application.template.yaml`
+- Dedicated Argo CD application render script: `scripts/render_sloth_cloud_api_lab_application.sh`
 
 当前隔离设计：
 
@@ -37,6 +39,7 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 - 它不会因为根应用同步被默认拉起
 - 它不会和现有 Compose API 的名字混在一起
 - 它不会占用现有 `14000` 入口
+- 它还可以先以“单独的 Argo CD 应用对象”形式被挂进界面，但保持手动同步
 
 ## Required decisions before rollout
 
@@ -47,12 +50,13 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 
 ## Suggested rollout order
 
-1. Update the overlay with a real image reference and reachable upstream URLs.
-2. Create the backing secret store for External Secrets.
-3. Add `sloth-cloud-api/lab` into `k8s/apps/kustomization.yaml` only when you are ready to test it.
-4. Render and apply the root Argo CD application.
-5. Wait for `sloth-cloud-api-lab` to become Ready.
-6. Test the route:
+1. Render and apply the dedicated Argo CD application object first, but keep it on manual sync.
+2. Update the overlay with a real image reference and reachable upstream URLs.
+3. Create the backing secret store for External Secrets.
+4. Either keep using the dedicated app path or add `sloth-cloud-api/lab` into `k8s/apps/kustomization.yaml` only when you are ready to test it.
+5. Manually sync `sloth-cloud-api-lab` only after the image and secrets are real.
+6. Wait for `sloth-cloud-api-lab` to become Ready.
+7. Test the route:
 
 ```bash
 curl -H 'Host: sloth-cloud-api.lab.localhost' http://<traefik-gateway-address>/api/v1/health
@@ -81,4 +85,5 @@ If the lab API is unhealthy or its upstream dependencies are not reachable:
 ```bash
 cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
 ruby scripts/validate_k8s_manifests.rb
+bash scripts/render_sloth_cloud_api_lab_application.sh
 ```

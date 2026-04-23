@@ -18,9 +18,11 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
 - `adr/0003-lab-first-k8s-migrations.md` records that business services must enter Kubernetes as isolated lab variants first.
 - `scripts/render_root_application.sh` renders the root Argo CD application using either `PLATFORM_GIT_REPO` or the configured `origin` remote.
+- `scripts/render_sloth_cloud_api_lab_application.sh` renders a dedicated Argo CD application for `sloth-cloud-api-lab` without enabling automatic sync.
 - `scripts/preflight_mac_lab.sh` checks whether this Mac is ready to host the local lab path.
 - `runbooks/learning-whoami-gitops-drill.md` captures the first end-to-end GitOps sync and self-heal drill.
 - `runbooks/sloth-cloud-api-k3s-migration.md` captures the first app migration path.
+- `runbooks/sloth-cloud-api-lab-argocd-application.md` captures the manual-sync-only Argo CD application path for the first real business service.
 
 ## Done definition
 
@@ -59,6 +61,7 @@ Safety hardening completed after the first learning phase:
 - the dedicated namespace `sloth-labs` was added
 - the lab route was made explicit as `sloth-cloud-api.lab.localhost`
 - `k8s/apps/kustomization.yaml` was emptied by default so placeholder lab overlays are not pulled into root sync accidentally
+- a dedicated Argo CD `Application` render path now exists so the lab API can appear in Argo UI without auto-syncing into the cluster
 
 ## Next entry point
 

@@ -13,6 +13,8 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/bootstrap/scripts/create-k3d-cluster.sh` creates a local macOS-friendly K3s lab by using k3d on top of Docker.
 - `k8s/bootstrap/scripts/bootstrap-platform-mac-learning.sh` bootstraps the Mac lab in a lighter learning-first mode.
 - `k8s/bootstrap/scripts/show-argocd-admin-password.sh` gives the local Argo CD admin password for first login.
+- `scripts/start_argocd_ui_port_forward.sh` starts a local-only or LAN-reachable Argo CD UI port-forward on demand.
+- `scripts/reset_argocd_admin_password.sh` resets the Argo CD admin password by patching `argocd-secret`.
 - `k8s/apps/kustomization.yaml` makes the root Argo CD application path syncable.
 - `k8s/apps/learning-whoami/base` provides a zero-dependency learning app for the first Gateway API and rollout drill.
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
@@ -21,6 +23,7 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `scripts/render_sloth_cloud_api_lab_application.sh` renders a dedicated Argo CD application for `sloth-cloud-api-lab` without enabling automatic sync.
 - `scripts/preflight_mac_lab.sh` checks whether this Mac is ready to host the local lab path.
 - `runbooks/learning-whoami-gitops-drill.md` captures the first end-to-end GitOps sync and self-heal drill.
+- `runbooks/argocd-access-and-password.md` explains how Argo CD login password changes work and why LAN access fails by default.
 - `runbooks/sloth-cloud-api-k3s-migration.md` captures the first app migration path.
 - `runbooks/sloth-cloud-api-lab-argocd-application.md` captures the manual-sync-only Argo CD application path for the first real business service.
 

@@ -1,14 +1,14 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: sloth-cloud-api
+  name: sloth-cloud-api-lab
 spec:
   parentRefs:
     - name: traefik-gateway
       namespace: traefik
   hostnames:
-    - api.lab.localhost
+    - sloth-cloud-api.lab.localhost
   rules:
     - backendRefs:
-        - name: sloth-cloud-api
+        - name: sloth-cloud-api-lab
           port: 80

@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sloth-cloud-api
+  name: sloth-cloud-api-lab
   labels:
-    app.kubernetes.io/name: sloth-cloud-api
-    app.kubernetes.io/part-of: sloth-cloud
+    app.kubernetes.io/name: sloth-cloud-api-lab
+    app.kubernetes.io/part-of: sloth-cloud-lab
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: sloth-cloud-api
+      app.kubernetes.io/name: sloth-cloud-api-lab
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: sloth-cloud-api
-        app.kubernetes.io/part-of: sloth-cloud
+        app.kubernetes.io/name: sloth-cloud-api-lab
+        app.kubernetes.io/part-of: sloth-cloud-lab
     spec:
       containers:
         - name: api
-          image: ghcr.io/replace-me/sloth-cloud-api:0.0.1
+          image: ghcr.io/replace-me/sloth-cloud-api-lab:0.0.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 4000
@@ -26,6 +26,8 @@ spec:
           env:
             - name: PORT
               value: "4000"
+            - name: PLATFORM_ENV
+              value: "lab"
           resources:
             requests:
               cpu: 100m

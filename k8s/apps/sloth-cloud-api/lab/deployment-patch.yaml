@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sloth-cloud-api
+  name: sloth-cloud-api-lab
 spec:
   template:
     spec:
@@ -9,6 +9,6 @@ spec:
         - name: api
           envFrom:
             - configMapRef:
-                name: sloth-cloud-api-config
+                name: sloth-cloud-api-lab-config
             - secretRef:
-                name: sloth-cloud-api-secrets
+                name: sloth-cloud-api-lab-secrets

@@ -16,6 +16,7 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/apps/kustomization.yaml` makes the root Argo CD application path syncable.
 - `k8s/apps/learning-whoami/base` provides a zero-dependency learning app for the first Gateway API and rollout drill.
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
+- `adr/0003-lab-first-k8s-migrations.md` records that business services must enter Kubernetes as isolated lab variants first.
 - `scripts/render_root_application.sh` renders the root Argo CD application using either `PLATFORM_GIT_REPO` or the configured `origin` remote.
 - `scripts/preflight_mac_lab.sh` checks whether this Mac is ready to host the local lab path.
 - `runbooks/learning-whoami-gitops-drill.md` captures the first end-to-end GitOps sync and self-heal drill.
@@ -31,11 +32,12 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - The macOS path has a lighter first-day bootstrap so learning and experimentation can start before full observability and app sync are enabled.
 - A no-risk demo app is reachable through `whoami.lab.localhost` before any real business service migration begins.
 - The first GitOps lesson is durable in-repo and proves both automated sync and self-heal behavior.
+- The first real business-service candidate is isolated as `sloth-cloud-api-lab` in `sloth-labs`, with a lab-only hostname and no default root sync inclusion.
 
 ## Verification
 
 ```bash
-cd "/Users/shulai/Documents/New project/platform-control"
+cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
 bash scripts/preflight_k3s_lab.sh
 bash k8s/bootstrap/scripts/install-k3s.sh
 bash k8s/bootstrap/scripts/bootstrap-platform.sh
@@ -50,6 +52,13 @@ Live verification completed on the Mac lab:
 - Git commit `d97cca9` changed the `Deployment` desired replicas from `1` to `2`
 - Argo CD reconciled that Git change into the cluster
 - a manual drift by `kubectl scale ... --replicas=1` was self-healed back to `2`
+
+Safety hardening completed after the first learning phase:
+
+- `sloth-cloud-api` Kubernetes resources were renamed to `sloth-cloud-api-lab`
+- the dedicated namespace `sloth-labs` was added
+- the lab route was made explicit as `sloth-cloud-api.lab.localhost`
+- `k8s/apps/kustomization.yaml` was emptied by default so placeholder lab overlays are not pulled into root sync accidentally
 
 ## Next entry point
 

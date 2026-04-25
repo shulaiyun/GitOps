@@ -34,6 +34,10 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `adr/0004-dev-real-write-lab-boundary.md` records the accepted boundary for real write lab operations.
 - `scripts/import_sloth_cloud_api_lab_image.sh` imports the current Compose API image into the k3d cluster as `sloth-cloud-api-lab:dev`.
 - `scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh` creates the manual Kubernetes Secret used by the lab API without committing secret values to Git.
+- `k8s/apps/sloth-cloud-web/lab-dev-real-write` adds the first Web lab overlay that proxies `/api` to the Kubernetes `sloth-cloud-api-lab` Service.
+- `scripts/import_sloth_cloud_web_lab_image.sh` imports the current Compose Web image into the k3d cluster as `sloth-cloud-web:dev`.
+- `scripts/render_sloth_cloud_web_lab_application.sh` renders the manual-sync-only Argo CD application for the Web lab.
+- `runbooks/sloth-cloud-web-lab-gitops.md` records the Web lab rollout, verification, and rollback path with Chinese term explanations.
 
 ## Done definition
 
@@ -78,15 +82,19 @@ Safety hardening completed after the first learning phase:
 - the dev real-write overlay now replaces `replace-me` URLs with local development endpoints and keeps secrets out of Git
 - the first manual `SYNC` of `sloth-cloud-api-lab` completed successfully in Argo CD
 - the lab API is reachable through `http://sloth-cloud-api.lab.localhost:16080/api/v1/health`
+- the next service-building step is `sloth-cloud-web-lab`, which keeps the existing Compose Web active while testing a Kubernetes Web -> API path
 
 ## Next entry point
 
-Use the running `sloth-cloud-api-lab` to learn real business integration safely:
+Use the running `sloth-cloud-api-lab` and `sloth-cloud-web-lab` path to learn real business integration safely:
 
-1. Inspect the Argo object chain from `Application -> Deployment -> ReplicaSet -> Pod -> Logs`.
-2. Exercise low-risk authenticated API reads first.
-3. Then test one accepted development write operation and record its rollback or cleanup path.
-4. If the Compose API image changes, re-run `scripts/import_sloth_cloud_api_lab_image.sh` and restart/sync the lab Deployment.
+1. Deploy the Web lab with manual Argo CD sync.
+2. Verify `http://cloud.lab.localhost:16080/` returns the Web UI.
+3. Verify `http://cloud.lab.localhost:16080/api/v1/health` reaches the API through the Web proxy.
+4. Inspect the Argo object chain from `Application -> Deployment -> ReplicaSet -> Pod -> Logs`.
+5. Exercise low-risk authenticated API reads first.
+6. Then test one accepted development write operation and record its rollback or cleanup path.
+7. If the Compose API or Web image changes, re-run the matching image import script and restart/sync the lab Deployment.
 
 ## Open questions
 

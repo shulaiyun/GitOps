@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sloth-cloud-web-lab
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ${PLATFORM_GIT_REPO}
+    targetRevision: ${PLATFORM_GIT_REVISION}
+    path: k8s/apps/sloth-cloud-web/lab-dev-real-write
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sloth-labs
+  info:
+    - name: Mode
+      value: Dev lab web, manual sync only
+    - name: Route
+      value: cloud.lab.localhost
+    - name: API upstream
+      value: sloth-cloud-api-lab Kubernetes Service
+    - name: Current live web
+      value: Compose sloth-cloud-web remains active until explicit cutover
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

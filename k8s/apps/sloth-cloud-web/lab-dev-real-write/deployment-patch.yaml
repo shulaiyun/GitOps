@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sloth-cloud-web
+  labels:
+    app.kubernetes.io/part-of: sloth-cloud-lab
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/part-of: sloth-cloud-lab
+    spec:
+      containers:
+        - name: web
+          env:
+            - name: API_PROXY_URL
+              value: http://sloth-cloud-api-lab.sloth-labs.svc.cluster.local:80

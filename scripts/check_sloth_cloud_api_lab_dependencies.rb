@@ -5,6 +5,8 @@ require "yaml"
 
 root = File.expand_path("..", __dir__)
 strict = ARGV.include?("--strict")
+profile_arg = ARGV.find { |arg| arg.start_with?("--profile=") }
+profile_name = profile_arg&.split("=", 2)&.last || "dev_real_write"
 
 inventory_path = File.join(root, "inventory/sloth-cloud-api-lab-dependencies.yaml")
 inventory = YAML.load_file(inventory_path)
@@ -46,11 +48,28 @@ secret_store_placeholder = secret_store_name.include?("replace-me")
 class_counts = Hash.new(0)
 inventory.fetch("config").each_value { |meta| class_counts[meta.fetch("class")] += 1 }
 inventory.fetch("secrets").each_value { |meta| class_counts[meta.fetch("class")] += 1 }
+profile = inventory.fetch("profiles").fetch(profile_name)
+operation_policy = inventory.fetch("operation_policy")
 
 puts "Sloth Cloud API lab dependency check"
 puts "ConfigMap keys: #{actual_config.length}"
 puts "ExternalSecret keys: #{actual_secrets.length}"
 puts "Class counts: #{class_counts.sort.map { |key, value| "#{key}=#{value}" }.join(", ")}"
+puts "Profile: #{profile_name} - #{profile.fetch("label")}"
+puts
+
+puts "Operation boundary:"
+if operation_policy.fetch("destructive_dev_business_operations_are_accepted")
+  puts "  Destructive development business operations: accepted"
+else
+  puts "  Destructive development business operations: blocked"
+end
+
+if operation_policy.fetch("project_code_mutation_is_accepted")
+  puts "  Project code mutation: accepted"
+else
+  puts "  Project code mutation: blocked"
+end
 puts
 
 if missing_config.empty? && stale_config.empty? && missing_secrets.empty? && stale_secrets.empty?

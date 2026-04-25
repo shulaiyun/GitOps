@@ -21,6 +21,44 @@ classes:
     id: secret_only
     label: Secret only
     chinese: "必须走 Secret 或 ExternalSecret"
+profiles:
+  dev_real_write:
+    label: "Dev real-write lab"
+    chinese: "开发环境真实写入实验"
+    intent: "Connect the lab API to real development business systems and allow destructive business side effects while protecting the project itself."
+    accepted_side_effects:
+      - "payment"
+      - "refund"
+      - "service_provision"
+      - "service_delete"
+      - "vps_reinstall"
+      - "vps_power_action"
+      - "dns_change"
+      - "webhook_send"
+      - "deployment_run"
+      - "development_database_write"
+    protected_assets:
+      - "source_code"
+      - "git_history"
+      - "compose_definitions"
+      - "kubernetes_manifests"
+      - "production_route_cutover"
+      - "non_dev_remote_services"
+    required_gates:
+      - "No placeholder image or replace-me value remains."
+      - "ExternalSecret uses a real ClusterSecretStore."
+      - "All connected systems are confirmed as development-owned or explicitly accepted by the operator."
+      - "The lab API must not mount or mutate the project source tree."
+      - "The lab API must not push Git commits, rewrite Git history, or edit Compose/Kubernetes control files."
+      - "Traffic remains on lab routes until an explicit cutover decision exists."
+operation_policy:
+  current_profile: dev_real_write
+  destructive_dev_business_operations_are_accepted: true
+  project_code_mutation_is_accepted: false
+  notes:
+    - "The lab may mutate development business data because this environment is operator-owned."
+    - "The lab must not mutate the project repository, source code, Compose files, Kubernetes manifests, or Git history."
+    - "Production-like data changes are acceptable only when the target system is actually this development environment."
 config:
   PORT:
     class: A
@@ -41,7 +79,7 @@ config:
   PAYMENTER_MODE:
     class: C
     reason: "Current value is live and may call the real billing/customer system."
-    action: "Disable, mock, or point to a lab Paymenter before first sync."
+    action: "Allowed in dev_real_write if the target Paymenter is development-owned; otherwise replace with a dev endpoint."
   PAYMENTER_API_URL:
     class: B
     reason: "Current value uses replace-me-paymenter."
@@ -49,11 +87,11 @@ config:
   CONVOY_ENABLED:
     class: C
     reason: "Current value enables real server-control integration."
-    action: "Disable or point Convoy to a lab-safe endpoint before first sync."
+    action: "Allowed in dev_real_write if the target Convoy controls development-owned VPS resources."
   CONVOY_MODE:
     class: C
     reason: "Current value is live."
-    action: "Use a lab-safe mode if supported, or keep disabled until endpoint mapping is ready."
+    action: "Allowed in dev_real_write after the Convoy endpoint is confirmed as development-owned."
   CONVOY_BASE_URL:
     class: B
     reason: "Current value uses replace-me-convoy."
@@ -73,11 +111,11 @@ config:
   MANAGED_APP_ENABLED:
     class: C
     reason: "Current value enables managed app build/deploy behavior inside the lab cluster."
-    action: "Disable for the first API sync, or isolate build namespace and registry first."
+    action: "Allowed in dev_real_write after the registry, namespace, RBAC, and quotas are ready."
   MANAGED_APP_DRIVER:
     class: C
     reason: "in-cluster means the API can create Kubernetes build/deploy resources."
-    action: "Disable managed apps or keep this only after RBAC, namespace, and registry are ready."
+    action: "Allowed in dev_real_write after RBAC, namespace, and registry are ready."
   MANAGED_APP_DEFAULT_CLUSTER_REF:
     class: A
     reason: "Cluster reference name is harmless when managed apps are disabled."
@@ -153,7 +191,7 @@ config:
   ASSISTANT_ENABLED:
     class: C
     reason: "Assistant enabled requires provider API keys and quota cookie secret."
-    action: "Disable for first sync unless all assistant secrets are ready."
+    action: "Allowed in dev_real_write after provider keys and quota cookie secret are present."
   ASSISTANT_PRIMARY_PROVIDER:
     class: A
     reason: "Provider preference is ordinary non-secret config."
@@ -266,6 +304,7 @@ secrets:
 first_sync_gates:
   - "No ConfigMap value may contain replace-me."
   - "ExternalSecret secretStoreRef.name must not be replace-me-secret-store."
-  - "Live integrations must be disabled or pointed at lab-safe endpoints."
-  - "Managed app in-cluster build/deploy must stay disabled until registry, namespace, RBAC, and quota are ready."
-  - "Assistant must stay disabled until provider keys and quota cookie secret are available."
+  - "Live integrations may write development business data, but connected targets must be development-owned or explicitly accepted."
+  - "Managed app in-cluster build/deploy may be enabled only after registry, namespace, RBAC, and quota are ready."
+  - "Assistant may be enabled only after provider keys and quota cookie secret are available."
+  - "The lab API must not mutate source code, Git history, Compose definitions, or Kubernetes control files."

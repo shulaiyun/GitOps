@@ -21,9 +21,11 @@
 
 这些配置里有 `replace-me`，或者明确指向还不存在的服务。第一次同步前必须改掉。
 
-`C. 暂时关闭或隔离`
+`C. 开发环境真实写入，需要明确边界`
 
-这些配置会触发现实业务动作，例如调用真实支付、真实服务器管理、真实构建部署或真实 AI 额度。第一次同步前要么关掉，要么明确指向 lab 环境。
+这些配置会触发现实业务动作，例如调用真实支付、真实服务器管理、真实构建部署或真实 AI 额度。
+
+在 `dev_real_write` profile 下，这类动作允许影响开发环境业务数据。它们不再要求必须关闭，但必须确认目标是开发环境，且不能破坏项目代码、Git、Compose 或 K8s 控制文件。
 
 `D. 必须进 Secret / ExternalSecret`
 
@@ -62,20 +64,49 @@
 | `OPERATOR_CLOUDFLARE_TUNNEL_SERVICE` | `replace-me-web` | 指向 lab tunnel target 或关闭 |
 | `OPERATOR_MONITORING_WEBHOOK_BASE_URL` | `replace-me-api` | 指向 lab webhook 或关闭 |
 
-## C. 暂时关闭或隔离
+## C. 开发环境真实写入，需要明确边界
 
-这些配置不是“错”，但第一次同步前风险比较高：
+这些配置不是“错”，它们正是让 lab 接触真实业务的地方。当前接受开发环境业务数据被实验改动，但仍然保护项目本体。
 
-| 配置 | 风险 | 建议 |
+| 配置 | 会影响什么 | 当前策略 |
 | --- | --- | --- |
-| `PAYMENTER_MODE=live` | 可能调用真实客户/支付系统 | 第一次同步前关闭或指向 lab |
-| `CONVOY_ENABLED=true` | 可能操作真实服务器管理系统 | 第一次同步前关闭或指向 lab Convoy |
-| `CONVOY_MODE=live` | 明确是 live 模式 | 使用 lab-safe 模式或关闭 |
-| `MANAGED_APP_ENABLED=true` | 可能在集群里创建构建/部署资源 | 先关闭，等 registry/RBAC/quota 好了再开 |
-| `MANAGED_APP_DRIVER=in-cluster` | 会把当前 K8s 当执行环境 | 先隔离 namespace、权限和资源配额 |
-| `MANAGED_APP_BUILD_NAMESPACE` | 构建命名空间需要治理 | 先创建 quota/RBAC，再启用 |
-| `MANAGED_APP_IMAGE_REGISTRY_INSECURE=true` | 非安全 registry 访问 | 只允许本地 lab registry 使用 |
-| `ASSISTANT_ENABLED=true` | 需要真实 AI provider 密钥和额度控制 | 密钥没准备好前先关闭 |
+| `PAYMENTER_MODE=live` | 开发订单、付款、退款状态 | 允许，但必须是开发环境 Paymenter |
+| `CONVOY_ENABLED=true` | 开发 VPS 的开通、删除、重装、电源状态 | 允许，但必须是开发环境 Convoy |
+| `CONVOY_MODE=live` | 真实调用 Convoy API | 允许连接开发 Convoy |
+| `MANAGED_APP_ENABLED=true` | 创建真实构建和部署资源 | 允许，但只进 lab namespace / lab registry |
+| `MANAGED_APP_DRIVER=in-cluster` | 使用当前 K8s 做部署执行环境 | 允许，但不能挂载或改项目源码 |
+| `MANAGED_APP_BUILD_NAMESPACE` | 创建构建 Pod 和临时资源 | 允许，但需要 namespace、RBAC 和 quota |
+| `MANAGED_APP_IMAGE_REGISTRY_INSECURE=true` | 使用非 HTTPS registry | 只允许本地/开发 registry |
+| `ASSISTANT_ENABLED=true` | 消耗开发环境 AI provider 额度 | 允许，但密钥和额度 cookie secret 必须存在 |
+
+## Dev real-write 边界
+
+我们现在采用 `dev_real_write`：
+
+```text
+允许真实写开发业务状态
+禁止破坏项目本体
+```
+
+允许被实验影响：
+
+- 测试付款、退款、订单
+- 测试客户状态
+- 测试服务开通和删除
+- 开发 VPS 重启、关机、重装
+- 开发 DNS 记录
+- 开发 webhook
+- lab 部署资源
+- 开发数据库业务写入
+
+仍然禁止：
+
+- API 运行时改源码
+- API 运行时 push / reset / rewrite Git
+- API 运行时改 Compose 文件
+- API 运行时改 `platform-control` 控制清单
+- lab 接管 `14000` 或正式域名入口
+- 误操作不属于当前开发环境的远端生产系统
 
 ## D. 必须进 Secret / ExternalSecret
 
@@ -134,11 +165,11 @@ ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --strict
 - 镜像还是占位符
 - 上游 URL 还有 `replace-me`
 - secret store 还是占位符
-- live 集成还没决定是否关闭或隔离
+- live 集成已经允许用于开发环境真实写入，但还没有真实开发地址和密钥
 
-下一步应该先做“最小可启动 profile”：
+下一步应该先做“dev_real_write 可启动 profile”：
 
-1. 关闭高风险 live 集成
-2. 替换必要 URL
-3. 接上最少密钥
+1. 替换必要 URL
+2. 接上必要密钥
+3. 确认 API 容器不能修改项目代码和控制仓库
 4. 再考虑手动 `SYNC`

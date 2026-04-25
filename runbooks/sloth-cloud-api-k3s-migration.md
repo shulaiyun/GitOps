@@ -28,6 +28,7 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 - Dedicated Argo CD application render script: `scripts/render_sloth_cloud_api_lab_application.sh`
 - Dependency classification: `inventory/sloth-cloud-api-lab-dependencies.yaml`
 - Dependency runbook: `runbooks/sloth-cloud-api-lab-dependency-matrix.md`
+- Dev real-write policy: `runbooks/sloth-cloud-api-lab-dev-real-write-policy.md`
 
 当前隔离设计：
 
@@ -71,6 +72,22 @@ curl -H 'Host: sloth-cloud-api.lab.localhost' http://<traefik-gateway-address>/a
 先让它在实验入口里活起来，再谈后面的切换。
 只要还在 `sloth-cloud-api.lab.localhost` 这个入口，它就不是现网切换。
 
+## Dev real-write boundary
+
+This lab may write development business data.
+
+中文解释：
+
+你已经确认开发环境里的业务数据、账单、客户状态、服务器状态、DNS、webhook、部署记录和数据库写入都可以被实验影响。
+
+但项目本体仍然要保护：
+
+- 不改项目源码
+- 不改 Git 历史
+- 不改现有 Compose 文件
+- 不改 `platform-control` 控制清单
+- 不接管现有 `14000` 或正式域名入口
+
 ## Rollback
 
 If the lab API is unhealthy or its upstream dependencies are not reachable:
@@ -90,5 +107,5 @@ If the lab API is unhealthy or its upstream dependencies are not reachable:
 cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
 ruby scripts/validate_k8s_manifests.rb
 bash scripts/render_sloth_cloud_api_lab_application.sh
-ruby scripts/check_sloth_cloud_api_lab_dependencies.rb
+ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write
 ```

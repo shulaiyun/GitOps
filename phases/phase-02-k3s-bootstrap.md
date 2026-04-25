@@ -28,6 +28,8 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `runbooks/sloth-cloud-api-k3s-migration.md` captures the first app migration path.
 - `runbooks/sloth-cloud-api-lab-argocd-application.md` captures the manual-sync-only Argo CD application path for the first real business service.
 - `runbooks/sloth-cloud-api-lab-dependency-matrix.md` records which lab API config values can be kept, replaced, disabled, or moved to secrets.
+- `runbooks/sloth-cloud-api-lab-dev-real-write-policy.md` records that development business data may be mutated while project code and control files remain protected.
+- `adr/0004-dev-real-write-lab-boundary.md` records the accepted boundary for real write lab operations.
 
 ## Done definition
 
@@ -68,6 +70,7 @@ Safety hardening completed after the first learning phase:
 - `k8s/apps/kustomization.yaml` was emptied by default so placeholder lab overlays are not pulled into root sync accidentally
 - a dedicated Argo CD `Application` render path now exists so the lab API can appear in Argo UI without auto-syncing into the cluster
 - the lab API ConfigMap and ExternalSecret dependencies are classified before any sync attempt
+- the lab policy now allows real writes to development business state but still blocks mutation of source code, Git history, Compose definitions, Kubernetes control manifests, and traffic cutover
 
 ## Next entry point
 

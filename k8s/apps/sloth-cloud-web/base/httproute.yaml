@@ -11,6 +11,7 @@ spec:
       namespace: traefik
   hostnames:
     - cloud.lab.localhost
+    - "192.168.16.102"
   rules:
     - backendRefs:
         - name: sloth-cloud-web

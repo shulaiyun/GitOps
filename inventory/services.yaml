@@ -207,7 +207,7 @@ services:
     source:
       compose_file: /Users/shulai/Documents/New project/vps/deploy/convoy/docker-compose.yml
       compose_service: sloth-convoy-web
-    notes: "Caddy front end for Convoy. Bound source tree means packaging must be cleaned up before migration."
+    notes: "Caddy front end for Convoy backend. Current source tree has no /public browser UI, so treat 18181 as a component health target rather than a user-facing page."
   - id: sloth-convoy-php
     status: running
     project: sloth-convoy
@@ -306,6 +306,7 @@ services:
     ingress:
       direct:
         - http://127.0.0.1:7001
+        - http://192.168.16.102:7001
       planned_hosts:
         - http://xboard.localhost:15080
     ports:
@@ -326,7 +327,7 @@ services:
     source:
       compose_file: /Users/shulai/Documents/New project/SlothVPN-source-clean/Xboard-master/compose.yaml
       compose_service: web
-    notes: "App container includes many bind-mounted source overrides. Package cleanup is required before migration."
+    notes: "App container includes many bind-mounted source overrides. On 2026-04-25, empty bind-mount directories were restored to files from the Xboard image, a local APP_KEY was generated, SQLite data was rebuilt, and Redis was pointed at the compose redis service."
   - id: sloth-xboard-horizon
     status: running
     project: sloth-xboard
@@ -457,6 +458,7 @@ services:
     ingress:
       direct:
         - http://127.0.0.1:15080
+        - http://192.168.16.102:15080/dashboard/
       planned_hosts:
         - http://traefik.localhost:15080
     ports:

@@ -9,11 +9,10 @@
         href: http://192.168.16.102:18080
         description: 支付与开通应用层；局域网直连。
     - Sloth Convoy:
-        href: http://192.168.16.102:18181
-        description: Convoy 面板前端；局域网直连。
+        description: Convoy 后端组件；18181 当前只有 Caddy/PHP 入口但没有可浏览首页，先作为运行状态监控项。
     - Sloth Xboard:
-        href: http://xboard.localhost:15080
-        description: VPN 面板前端；当前仍依赖本机 Traefik Host 路由，后续补局域网域名。
+        href: http://192.168.16.102:7001
+        description: VPN 面板前端；已恢复 Web 容器，其他设备可用局域网直连。
     - CLI Proxy API:
         description: 本地工具 API，没有独立浏览器页面。
 - Kubernetes Lab:
@@ -21,11 +20,11 @@
         href: http://192.168.16.102:19082
         description: Kubernetes GitOps 管理面板；需要 Mac 上保持 port-forward 运行。
     - Sloth Cloud Web Lab:
-        href: http://cloud.lab.localhost:16080
-        description: K3s 实验集群里的 Web 入口；当前主要在 Mac 本机访问。
+        href: http://192.168.16.102:16080
+        description: K3s 实验集群里的 Web 入口；局域网直连到 k3d/K3s 网关。
     - Sloth Cloud API Lab:
-        href: http://sloth-cloud-api.lab.localhost:16080/api/v1/health
-        description: K3s 实验集群里的 API 健康检查；当前主要在 Mac 本机访问。
+        href: http://192.168.16.102:16080/api/v1/health
+        description: K3s 实验集群里的 API 健康检查；打开后看到 JSON 即代表实验 API 活着。
 - Platform:
     - Homepage:
         href: http://192.168.16.102:15002
@@ -40,5 +39,5 @@
         href: http://192.168.16.102:15004
         description: 主机与容器资源监控。
     - Traefik Dashboard:
-        href: http://traefik.localhost:15080/dashboard/
-        description: 边缘路由与代理状态视图；当前依赖本机 Host 路由，后续补局域网域名。
+        href: http://192.168.16.102:15080/dashboard/
+        description: 边缘路由与代理状态视图；其他设备可用局域网直连。

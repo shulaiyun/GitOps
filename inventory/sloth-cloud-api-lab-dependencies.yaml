@@ -1,0 +1,271 @@
+version: 1
+service: sloth-cloud-api-lab
+sources:
+  deployment: k8s/apps/sloth-cloud-api/base/deployment.yaml
+  configmap: k8s/apps/sloth-cloud-api/lab/configmap.yaml
+  external_secret: k8s/apps/sloth-cloud-api/lab/externalsecret.yaml
+classes:
+  A:
+    id: lab_keep
+    label: Lab can keep as-is
+    chinese: "实验环境可以暂时保留"
+  B:
+    id: replace_before_sync
+    label: Replace before first sync
+    chinese: "第一次同步前必须替换"
+  C:
+    id: disable_or_isolate
+    label: Disable or isolate before first sync
+    chinese: "第一次同步前建议关闭或隔离"
+  D:
+    id: secret_only
+    label: Secret only
+    chinese: "必须走 Secret 或 ExternalSecret"
+config:
+  PORT:
+    class: A
+    reason: "API listens on container port 4000 in both Compose and lab."
+    action: "Keep for the lab."
+  PLATFORM_ENV:
+    class: A
+    reason: "Marks the runtime as lab."
+    action: "Keep as lab."
+  SESSION_COOKIE_SECURE:
+    class: A
+    reason: "Local lab traffic is not fully HTTPS end to end."
+    action: "Keep false for local lab; revisit for production."
+  RUNTIME_READ_CACHE_TTL_MS:
+    class: A
+    reason: "Short runtime-state cache TTL is safe for lab validation."
+    action: "Keep."
+  PAYMENTER_MODE:
+    class: C
+    reason: "Current value is live and may call the real billing/customer system."
+    action: "Disable, mock, or point to a lab Paymenter before first sync."
+  PAYMENTER_API_URL:
+    class: B
+    reason: "Current value uses replace-me-paymenter."
+    action: "Replace with a lab-safe Paymenter URL or explicitly disable Paymenter integration."
+  CONVOY_ENABLED:
+    class: C
+    reason: "Current value enables real server-control integration."
+    action: "Disable or point Convoy to a lab-safe endpoint before first sync."
+  CONVOY_MODE:
+    class: C
+    reason: "Current value is live."
+    action: "Use a lab-safe mode if supported, or keep disabled until endpoint mapping is ready."
+  CONVOY_BASE_URL:
+    class: B
+    reason: "Current value uses replace-me-convoy."
+    action: "Replace with the intended Convoy lab URL."
+  CONVOY_TIMEOUT_MS:
+    class: A
+    reason: "Timeout value is not environment-specific."
+    action: "Keep."
+  CONVOY_APPLICATION_PREFIX:
+    class: A
+    reason: "Application API path prefix is ordinary routing config."
+    action: "Keep unless Convoy API shape changes."
+  CONVOY_SERVER_REF_KEYS:
+    class: A
+    reason: "Server reference key list is ordinary mapping config."
+    action: "Keep."
+  MANAGED_APP_ENABLED:
+    class: C
+    reason: "Current value enables managed app build/deploy behavior inside the lab cluster."
+    action: "Disable for the first API sync, or isolate build namespace and registry first."
+  MANAGED_APP_DRIVER:
+    class: C
+    reason: "in-cluster means the API can create Kubernetes build/deploy resources."
+    action: "Disable managed apps or keep this only after RBAC, namespace, and registry are ready."
+  MANAGED_APP_DEFAULT_CLUSTER_REF:
+    class: A
+    reason: "Cluster reference name is harmless when managed apps are disabled."
+    action: "Keep for now."
+  MANAGED_APP_NAMESPACE_PREFIX:
+    class: A
+    reason: "Namespace naming prefix is harmless when managed apps are disabled."
+    action: "Keep for now."
+  MANAGED_APP_BUILD_NAMESPACE:
+    class: C
+    reason: "Build namespace must exist and have clear quota/RBAC before builds are enabled."
+    action: "Create and govern it before enabling managed app builds."
+  MANAGED_APP_BUILDKIT_IMAGE:
+    class: A
+    reason: "BuildKit image reference is normal build configuration."
+    action: "Keep after build path is intentionally enabled."
+  MANAGED_APP_BUILDKIT_SNAPSHOTTER:
+    class: A
+    reason: "BuildKit snapshotter is normal build configuration."
+    action: "Keep."
+  MANAGED_APP_BUILD_EPHEMERAL_REQUEST:
+    class: A
+    reason: "Resource request is ordinary build tuning."
+    action: "Keep after build path is intentionally enabled."
+  MANAGED_APP_FALLBACK_NODE_IMAGE:
+    class: A
+    reason: "Fallback Node image is ordinary build configuration."
+    action: "Keep if the mirror remains reachable."
+  MANAGED_APP_FALLBACK_NPM_REGISTRY:
+    class: A
+    reason: "Fallback npm registry is ordinary build configuration."
+    action: "Keep if the mirror remains acceptable for lab."
+  MANAGED_APP_REWRITE_NODE_BASE_IMAGE:
+    class: A
+    reason: "Dockerfile rewrite flag is ordinary build behavior."
+    action: "Keep after build path is intentionally enabled."
+  MANAGED_APP_PREFER_GENERATED_NODE_DOCKERFILE:
+    class: A
+    reason: "Generated Dockerfile preference is ordinary build behavior."
+    action: "Keep after build path is intentionally enabled."
+  MANAGED_APP_IMAGE_REGISTRY:
+    class: B
+    reason: "Current value uses replace-me-registry."
+    action: "Replace with a real lab registry before enabling managed app builds."
+  MANAGED_APP_IMAGE_REGISTRY_INSECURE:
+    class: C
+    reason: "Insecure registry access should be deliberate and isolated."
+    action: "Keep true only for a local lab registry; otherwise set false."
+  MANAGED_APP_IMAGE_REPOSITORY_PREFIX:
+    class: A
+    reason: "Repository prefix is ordinary image naming config."
+    action: "Keep unless registry naming changes."
+  MANAGED_APP_INGRESS_CLASS:
+    class: A
+    reason: "Traefik is the current lab ingress/gateway implementation."
+    action: "Keep for lab."
+  MANAGED_APP_DEFAULT_DOMAIN_SUFFIX:
+    class: B
+    reason: "Current value uses replace-me.example."
+    action: "Replace with a lab domain suffix before enabling managed app previews."
+  MANAGED_APP_STORAGE_CLASS:
+    class: A
+    reason: "local-path is normal for a local K3s/k3d lab."
+    action: "Keep for Mac lab; revisit for production."
+  MANAGED_APP_BUILD_CPU_REQUEST:
+    class: A
+    reason: "Resource request is ordinary build tuning."
+    action: "Keep after build path is intentionally enabled."
+  MANAGED_APP_BUILD_MEMORY_REQUEST:
+    class: A
+    reason: "Resource request is ordinary build tuning."
+    action: "Keep after build path is intentionally enabled."
+  ASSISTANT_ENABLED:
+    class: C
+    reason: "Assistant enabled requires provider API keys and quota cookie secret."
+    action: "Disable for first sync unless all assistant secrets are ready."
+  ASSISTANT_PRIMARY_PROVIDER:
+    class: A
+    reason: "Provider preference is ordinary non-secret config."
+    action: "Keep if assistant remains enabled."
+  ASSISTANT_PROVIDER_CHAIN:
+    class: A
+    reason: "Provider fallback order is ordinary non-secret config."
+    action: "Keep if assistant remains enabled."
+  ASSISTANT_CONFIRM_TTL_SECONDS:
+    class: A
+    reason: "TTL config is safe."
+    action: "Keep."
+  ASSISTANT_SESSION_TTL_SECONDS:
+    class: A
+    reason: "TTL config is safe."
+    action: "Keep."
+  ASSISTANT_MAX_CONTEXT_MESSAGES:
+    class: A
+    reason: "Context limit is safe."
+    action: "Keep."
+  ASSISTANT_SUPPORT_WEB_URL:
+    class: A
+    reason: "Relative support URL is safe."
+    action: "Keep."
+  ASSISTANT_GUEST_DAILY_POINTS:
+    class: A
+    reason: "Quota config is safe."
+    action: "Keep."
+  ASSISTANT_FREE_DAILY_POINTS:
+    class: A
+    reason: "Quota config is safe."
+    action: "Keep."
+  ASSISTANT_PAID_DAILY_POINTS:
+    class: A
+    reason: "Quota config is safe."
+    action: "Keep."
+  ASSISTANT_GUEST_BURST_PER_MINUTE:
+    class: A
+    reason: "Rate-limit config is safe."
+    action: "Keep."
+  ASSISTANT_USER_BURST_PER_MINUTE:
+    class: A
+    reason: "Rate-limit config is safe."
+    action: "Keep."
+  ASSISTANT_UNLIMITED_PRODUCT_SLUG:
+    class: A
+    reason: "Product slug is non-secret config."
+    action: "Keep if Paymenter mapping is ready."
+  ASSISTANT_QUOTA_TIMEZONE:
+    class: A
+    reason: "Quota timezone is safe."
+    action: "Keep."
+  OPERATOR_PREVIEW_BASE_URL:
+    class: B
+    reason: "Current value uses replace-me-api."
+    action: "Replace with the lab API or preview service URL."
+  OPERATOR_ARTIFACT_BASE_URL:
+    class: B
+    reason: "Current value uses replace-me-api."
+    action: "Replace with the lab artifact base URL."
+  OPERATOR_WEB_BASE_URL:
+    class: B
+    reason: "Current value uses replace-me-web."
+    action: "Replace with the lab web URL."
+  OPERATOR_CLOUDFLARE_ZONE_NAME:
+    class: B
+    reason: "Current value uses replace-me-zone."
+    action: "Replace with a lab zone or disable Cloudflare-dependent operator actions."
+  OPERATOR_CLOUDFLARE_TUNNEL_SERVICE:
+    class: B
+    reason: "Current value uses replace-me-web."
+    action: "Replace with a lab tunnel target or disable tunnel actions."
+  OPERATOR_MONITORING_WEBHOOK_BASE_URL:
+    class: B
+    reason: "Current value uses replace-me-api."
+    action: "Replace with the lab monitoring webhook base URL or disable the path."
+secrets:
+  CONVOY_APPLICATION_KEY:
+    class: D
+    reason: "Convoy application key is sensitive."
+    action: "Provide through ExternalSecret after choosing the lab Convoy endpoint."
+  MANAGED_APP_INTERNAL_API_TOKEN:
+    class: D
+    reason: "Internal managed-app token is sensitive."
+    action: "Provide through ExternalSecret before enabling managed app operations."
+  ASSISTANT_OPENAI_API_KEY:
+    class: D
+    reason: "OpenAI API key is sensitive."
+    action: "Provide through ExternalSecret if assistant is enabled."
+  ASSISTANT_GEMINI_API_KEY:
+    class: D
+    reason: "Gemini API key is sensitive."
+    action: "Provide through ExternalSecret if provider chain includes Gemini."
+  ASSISTANT_CLAUDE_API_KEY:
+    class: D
+    reason: "Claude API key is sensitive."
+    action: "Provide through ExternalSecret if provider chain includes Claude."
+  ASSISTANT_QUOTA_COOKIE_SECRET:
+    class: D
+    reason: "Quota cookie signing secret is sensitive."
+    action: "Provide through ExternalSecret if assistant quotas are enabled."
+  OPERATOR_CLOUDFLARE_API_TOKEN:
+    class: D
+    reason: "Cloudflare token is sensitive and can change external DNS/tunnel state."
+    action: "Provide only for a lab-scoped token, or keep Cloudflare operator paths disabled."
+  OPERATOR_MONITORING_WEBHOOK_SECRET:
+    class: D
+    reason: "Monitoring webhook secret is sensitive."
+    action: "Provide through ExternalSecret if monitoring webhook path is enabled."
+first_sync_gates:
+  - "No ConfigMap value may contain replace-me."
+  - "ExternalSecret secretStoreRef.name must not be replace-me-secret-store."
+  - "Live integrations must be disabled or pointed at lab-safe endpoints."
+  - "Managed app in-cluster build/deploy must stay disabled until registry, namespace, RBAC, and quota are ready."
+  - "Assistant must stay disabled until provider keys and quota cookie secret are available."

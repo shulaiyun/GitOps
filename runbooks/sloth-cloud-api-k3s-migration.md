@@ -26,6 +26,8 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 - Lab overlay: `k8s/apps/sloth-cloud-api/lab`
 - Dedicated Argo CD application template: `k8s/bootstrap/manifests/sloth-cloud-api-lab-application.template.yaml`
 - Dedicated Argo CD application render script: `scripts/render_sloth_cloud_api_lab_application.sh`
+- Dependency classification: `inventory/sloth-cloud-api-lab-dependencies.yaml`
+- Dependency runbook: `runbooks/sloth-cloud-api-lab-dependency-matrix.md`
 
 当前隔离设计：
 
@@ -46,17 +48,19 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 1. Publish a Kubernetes-usable image for `sloth-cloud-api-lab`.
 2. Choose the upstream URLs that replace the compose-only service names in `configmap.yaml`.
 3. Bind `sloth-cloud-api-lab-secrets` to a real `ClusterSecretStore`.
-4. Explicitly decide when to add the lab overlay into the root sync path.
+4. Run the dependency matrix check and resolve all strict blockers.
+5. Explicitly decide when to add the lab overlay into the root sync path.
 
 ## Suggested rollout order
 
 1. Render and apply the dedicated Argo CD application object first, but keep it on manual sync.
-2. Update the overlay with a real image reference and reachable upstream URLs.
-3. Create the backing secret store for External Secrets.
-4. Either keep using the dedicated app path or add `sloth-cloud-api/lab` into `k8s/apps/kustomization.yaml` only when you are ready to test it.
-5. Manually sync `sloth-cloud-api-lab` only after the image and secrets are real.
-6. Wait for `sloth-cloud-api-lab` to become Ready.
-7. Test the route:
+2. Classify and resolve the ConfigMap and ExternalSecret dependencies.
+3. Update the overlay with a real image reference and reachable upstream URLs.
+4. Create the backing secret store for External Secrets.
+5. Either keep using the dedicated app path or add `sloth-cloud-api/lab` into `k8s/apps/kustomization.yaml` only when you are ready to test it.
+6. Manually sync `sloth-cloud-api-lab` only after the image and secrets are real.
+7. Wait for `sloth-cloud-api-lab` to become Ready.
+8. Test the route:
 
 ```bash
 curl -H 'Host: sloth-cloud-api.lab.localhost' http://<traefik-gateway-address>/api/v1/health
@@ -86,4 +90,5 @@ If the lab API is unhealthy or its upstream dependencies are not reachable:
 cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
 ruby scripts/validate_k8s_manifests.rb
 bash scripts/render_sloth_cloud_api_lab_application.sh
+ruby scripts/check_sloth_cloud_api_lab_dependencies.rb
 ```

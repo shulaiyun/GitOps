@@ -54,6 +54,36 @@ Expected result:
 - `/` returns the Web app HTML
 - `/api/v1/health` returns API health through the Web proxy
 
+## First Sync Result
+
+Completed on 2026-04-25 in the Mac `k3d` lab.
+
+Verified state:
+
+```text
+Application: sloth-cloud-web-lab Synced / Healthy
+Deployment: sloth-cloud-web 1/1 available
+Pod: sloth-cloud-web-* Running, 0 restarts
+Route: http://cloud.lab.localhost:16080/
+Web root: HTTP 200 HTML
+API through Web proxy: http://cloud.lab.localhost:16080/api/v1/health -> ok=true
+```
+
+Traffic path:
+
+```text
+Mac browser or curl
+-> cloud.lab.localhost:16080
+-> k3d load balancer
+-> Traefik Gateway
+-> HTTPRoute sloth-cloud-web
+-> Service sloth-cloud-web:80
+-> Pod sloth-cloud-web:80
+-> Web container proxy for /api
+-> Service sloth-cloud-api-lab:80
+-> Pod sloth-cloud-api-lab:4000
+```
+
 ## Rollback
 
 ```bash

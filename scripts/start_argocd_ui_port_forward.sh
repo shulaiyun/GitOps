@@ -6,7 +6,8 @@ NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
 SERVICE_NAME="${ARGOCD_SERVICE_NAME:-argocd-server}"
 LOCAL_PORT="${ARGOCD_LOCAL_PORT:-19080}"
 BIND_ADDRESS="${ARGOCD_BIND_ADDRESS:-127.0.0.1}"
-REMOTE_PORT="${ARGOCD_REMOTE_PORT:-443}"
+REMOTE_PORT="${ARGOCD_REMOTE_PORT:-80}"
+SCHEME="${ARGOCD_SCHEME:-http}"
 
 if ! command -v kubectl >/dev/null 2>&1; then
   echo "kubectl is required" >&2
@@ -24,13 +25,13 @@ echo
 
 if [[ "${BIND_ADDRESS}" == "127.0.0.1" || "${BIND_ADDRESS}" == "localhost" ]]; then
   echo "Local-only URL:"
-  echo "  https://127.0.0.1:${LOCAL_PORT}"
+  echo "  ${SCHEME}://127.0.0.1:${LOCAL_PORT}"
 else
   echo "LAN URL:"
   if [[ -n "${mac_lan_ip}" ]]; then
-    echo "  https://${mac_lan_ip}:${LOCAL_PORT}"
+    echo "  ${SCHEME}://${mac_lan_ip}:${LOCAL_PORT}"
   else
-    echo "  https://<this-mac-lan-ip>:${LOCAL_PORT}"
+    echo "  ${SCHEME}://<this-mac-lan-ip>:${LOCAL_PORT}"
   fi
   echo
   echo "Other computers on the same router still need:"

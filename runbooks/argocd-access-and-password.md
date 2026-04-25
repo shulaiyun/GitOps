@@ -23,8 +23,16 @@
 - `argocd-server` 是 `ClusterIP`
 - 要从浏览器访问它，靠的是 `kubectl port-forward`
 - `kubectl port-forward` 默认监听 `localhost`
+- 当前本地学习环境已把 `argocd-server` 调成 `server.insecure=true`，所以浏览器访问走 HTTP，避免自签 HTTPS 证书拦截
 
 所以这是一个“默认仅本机访问”的入口。
+
+专业名词解释：
+
+- `ClusterIP`：Kubernetes 里的内部服务地址，只能在集群内部直接访问。
+- `port-forward`：临时把本机端口转发到集群里的某个服务。
+- `server.insecure=true`：Argo CD 的本地学习模式，表示 UI 用 HTTP，不强制跳转自签 HTTPS。
+- 自签 HTTPS 证书：不是公网 CA 签发的证书，浏览器会警告；本地实验可用 HTTP 绕开这个学习障碍。
 
 ## 怎么改 Argo 登录密码
 
@@ -84,7 +92,7 @@ ARGOCD_BIND_ADDRESS=0.0.0.0 bash scripts/start_argocd_ui_port_forward.sh
 然后，在同一路由器里的别的电脑上访问：
 
 ```text
-https://192.168.16.110:19080
+http://192.168.16.110:19080
 ```
 
 这里的 `192.168.16.110` 要换成这台 Mac 当前的局域网 IP。
@@ -115,7 +123,7 @@ bash scripts/start_argocd_ui_port_forward.sh
 访问：
 
 ```text
-https://127.0.0.1:19080
+http://127.0.0.1:19080
 ```
 
 ### 想让同一路由器里的其他电脑也打开
@@ -128,7 +136,7 @@ ARGOCD_BIND_ADDRESS=0.0.0.0 bash scripts/start_argocd_ui_port_forward.sh
 访问：
 
 ```text
-https://这台Mac的局域网IP:19080
+http://这台Mac的局域网IP:19080
 ```
 
 ## 补一句边界
@@ -145,5 +153,6 @@ https://这台Mac的局域网IP:19080
 
 - 单独做 `Ingress` / `Gateway` 暴露
 - 或者给它挂专门域名和反向代理
+- 到正式环境再恢复 HTTPS 和可信证书
 
 但对你现在这套 Mac 实验集群来说，`port-forward + 局域网地址` 已经够用了。

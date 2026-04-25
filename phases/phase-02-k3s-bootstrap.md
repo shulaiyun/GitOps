@@ -14,6 +14,7 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/bootstrap/scripts/bootstrap-platform-mac-learning.sh` bootstraps the Mac lab in a lighter learning-first mode.
 - `k8s/bootstrap/scripts/show-argocd-admin-password.sh` gives the local Argo CD admin password for first login.
 - `scripts/start_argocd_ui_port_forward.sh` starts a local-only or LAN-reachable Argo CD UI port-forward on demand.
+- The Mac learning lab uses Argo CD `server.insecure=true` for local HTTP UI access, so browser teaching does not get blocked by self-signed HTTPS certificate warnings.
 - `scripts/reset_argocd_admin_password.sh` resets the Argo CD admin password by patching `argocd-secret`.
 - `k8s/apps/kustomization.yaml` makes the root Argo CD application path syncable.
 - `k8s/apps/learning-whoami/base` provides a zero-dependency learning app for the first Gateway API and rollout drill.

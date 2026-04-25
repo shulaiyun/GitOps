@@ -24,11 +24,14 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 
 - Base manifests: `k8s/apps/sloth-cloud-api/base`
 - Lab overlay: `k8s/apps/sloth-cloud-api/lab`
+- Dev real-write overlay: `k8s/apps/sloth-cloud-api/lab-dev-real-write`
 - Dedicated Argo CD application template: `k8s/bootstrap/manifests/sloth-cloud-api-lab-application.template.yaml`
 - Dedicated Argo CD application render script: `scripts/render_sloth_cloud_api_lab_application.sh`
 - Dependency classification: `inventory/sloth-cloud-api-lab-dependencies.yaml`
 - Dependency runbook: `runbooks/sloth-cloud-api-lab-dependency-matrix.md`
 - Dev real-write policy: `runbooks/sloth-cloud-api-lab-dev-real-write-policy.md`
+- Image import helper: `scripts/import_sloth_cloud_api_lab_image.sh`
+- Secret seed helper: `scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh`
 
 当前隔离设计：
 
@@ -47,18 +50,18 @@ Move `sloth-cloud-api` first as a lab variant because it is stateless, already e
 ## Required decisions before rollout
 
 1. Publish a Kubernetes-usable image for `sloth-cloud-api-lab`.
-2. Choose the upstream URLs that replace the compose-only service names in `configmap.yaml`.
-3. Bind `sloth-cloud-api-lab-secrets` to a real `ClusterSecretStore`.
+2. Import the local Compose API image into k3d as `sloth-cloud-api-lab:dev`.
+3. Seed `sloth-cloud-api-lab-secrets` from the local development API env.
 4. Run the dependency matrix check and resolve all strict blockers.
-5. Explicitly decide when to add the lab overlay into the root sync path.
+5. Explicitly decide when to manually sync the dedicated Argo CD app.
 
 ## Suggested rollout order
 
 1. Render and apply the dedicated Argo CD application object first, but keep it on manual sync.
-2. Classify and resolve the ConfigMap and ExternalSecret dependencies.
-3. Update the overlay with a real image reference and reachable upstream URLs.
-4. Create the backing secret store for External Secrets.
-5. Either keep using the dedicated app path or add `sloth-cloud-api/lab` into `k8s/apps/kustomization.yaml` only when you are ready to test it.
+2. Use the `lab-dev-real-write` overlay for the first real business connection.
+3. Import the local image and seed the manual Kubernetes Secret.
+4. Run strict dependency checks.
+5. Keep using the dedicated app path until the lab is stable.
 6. Manually sync `sloth-cloud-api-lab` only after the image and secrets are real.
 7. Wait for `sloth-cloud-api-lab` to become Ready.
 8. Test the route:
@@ -108,4 +111,7 @@ cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New pro
 ruby scripts/validate_k8s_manifests.rb
 bash scripts/render_sloth_cloud_api_lab_application.sh
 ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write
+bash scripts/import_sloth_cloud_api_lab_image.sh
+bash scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh
+ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write --strict --check-cluster-secret
 ```

@@ -47,22 +47,22 @@
 | `MANAGED_APP_*` 资源和构建调优项 | 在 managed app 功能关闭前，这些只是配置 |
 | `ASSISTANT_*` 配额和会话参数 | 在 assistant 功能关闭或密钥准备好后可用 |
 
-## B. 必须替换成本地或实验地址
+## B. 已替换成本地或实验地址
 
-这些当前还是占位符：
+这些之前是占位符，现在在 `lab-dev-real-write` overlay 里已经替换：
 
 | 配置 | 当前问题 | 第一次同步前动作 |
 | --- | --- | --- |
-| `PAYMENTER_API_URL` | `replace-me-paymenter` | 指向 lab Paymenter，或关闭 Paymenter 路径 |
-| `CONVOY_BASE_URL` | `replace-me-convoy` | 指向 lab Convoy |
-| `MANAGED_APP_IMAGE_REGISTRY` | `replace-me-registry` | 指向真实 lab 镜像仓库 |
-| `MANAGED_APP_DEFAULT_DOMAIN_SUFFIX` | `replace-me.example` | 换成 lab 域名后缀 |
-| `OPERATOR_PREVIEW_BASE_URL` | `replace-me-api` | 指向 lab API 或 preview 服务 |
-| `OPERATOR_ARTIFACT_BASE_URL` | `replace-me-api` | 指向 lab artifact 服务 |
-| `OPERATOR_WEB_BASE_URL` | `replace-me-web` | 指向 lab Web |
-| `OPERATOR_CLOUDFLARE_ZONE_NAME` | `replace-me-zone` | 换成 lab zone 或关闭 Cloudflare 路径 |
-| `OPERATOR_CLOUDFLARE_TUNNEL_SERVICE` | `replace-me-web` | 指向 lab tunnel target 或关闭 |
-| `OPERATOR_MONITORING_WEBHOOK_BASE_URL` | `replace-me-api` | 指向 lab webhook 或关闭 |
+| `PAYMENTER_API_URL` | 本机开发 Paymenter | 通过 `host.docker.internal:18080` 访问 |
+| `CONVOY_BASE_URL` | 本机开发 Convoy | 通过 `host.docker.internal:18181` 访问 |
+| `MANAGED_APP_IMAGE_REGISTRY` | 开发镜像仓库 | 当前使用 `192.168.16.220:30500` |
+| `MANAGED_APP_DEFAULT_DOMAIN_SUFFIX` | 开发域名后缀 | 当前使用 `shulaiyun.top` |
+| `OPERATOR_PREVIEW_BASE_URL` | lab API 入口 | 当前使用 `sloth-cloud-api.lab.localhost:16080` |
+| `OPERATOR_ARTIFACT_BASE_URL` | lab API 入口 | 当前使用 `sloth-cloud-api.lab.localhost:16080` |
+| `OPERATOR_WEB_BASE_URL` | 本机开发 Web | 当前使用 `localhost:13000` |
+| `OPERATOR_CLOUDFLARE_ZONE_NAME` | 开发 zone | 当前使用 `shulaiyun.top` |
+| `OPERATOR_CLOUDFLARE_TUNNEL_SERVICE` | 本机开发 Web | 通过 `host.docker.internal:13000` 访问 |
+| `OPERATOR_MONITORING_WEBHOOK_BASE_URL` | lab API 入口 | 当前使用 `sloth-cloud-api.lab.localhost:16080` |
 
 ## C. 开发环境真实写入，需要明确边界
 
@@ -110,7 +110,15 @@
 
 ## D. 必须进 Secret / ExternalSecret
 
-这些都应该通过 `ExternalSecret` 进入 `sloth-cloud-api-lab-secrets`：
+这些都应该进入 `sloth-cloud-api-lab-secrets`。
+
+当前学习环境先用手动 Kubernetes Secret，不使用 `ExternalSecret`。
+
+专业名词解释：
+
+- `ExternalSecret`：把外部密钥系统里的密钥同步进 Kubernetes Secret 的工具。
+- `ClusterSecretStore`：External Secrets 用来连接外部密钥系统的集群级配置。
+- 手动 Kubernetes Secret：先用脚本从本机开发 env 创建 Secret。它适合学习和本机实验，后面再换成 ExternalSecret。
 
 | Secret key | 中文说明 |
 | --- | --- |
@@ -123,13 +131,11 @@
 | `OPERATOR_CLOUDFLARE_API_TOKEN` | Cloudflare API token |
 | `OPERATOR_MONITORING_WEBHOOK_SECRET` | 监控 webhook 密钥 |
 
-另外，`ExternalSecret` 里的 `secretStoreRef.name` 现在还是：
+种入命令：
 
-```yaml
-replace-me-secret-store
+```bash
+bash scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh
 ```
-
-第一次同步前必须替换成真实的 `ClusterSecretStore`。
 
 ## 同步前检查命令
 
@@ -142,34 +148,29 @@ ruby scripts/check_sloth_cloud_api_lab_dependencies.rb
 
 - Deployment 里容器镜像是否还是 `replace-me`
 - ConfigMap 里所有 key 是否都在分级表登记
-- ExternalSecret 里所有 secretKey 是否都在分级表登记
+- Deployment 是否引用了 `sloth-cloud-api-lab-secrets`
 - 是否还有 `replace-me`
-- secret store 是否还是占位符
 
 如果只是学习和盘点，可以直接看输出。
 
 如果准备真正点 `SYNC`，用严格模式：
 
 ```bash
-ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --strict
+ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --strict --check-cluster-secret
 ```
 
 严格模式下，只要还有同步阻塞项，就会失败。
 
 ## 当前结论
 
-`sloth-cloud-api-lab` 现在不应该同步。
+`sloth-cloud-api-lab` 已经从“占位配置”推进到“dev_real_write 可启动配置”。
 
-原因不是 Kubernetes 结构有问题，而是运行材料还没准备好：
+现在还差运行前动作：
 
-- 镜像还是占位符
-- 上游 URL 还有 `replace-me`
-- secret store 还是占位符
-- live 集成已经允许用于开发环境真实写入，但还没有真实开发地址和密钥
+- 把本机 Compose API 镜像导入 k3d
+- 把本机开发 env 里的密钥种入 Kubernetes Secret
+- 用严格模式确认 Secret key 齐全
 
-下一步应该先做“dev_real_write 可启动 profile”：
+然后才手动 `SYNC`。
 
-1. 替换必要 URL
-2. 接上必要密钥
-3. 确认 API 容器不能修改项目代码和控制仓库
-4. 再考虑手动 `SYNC`
+注意：这仍然不会接管现有 Compose 的 `14000` 入口。

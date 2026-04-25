@@ -86,11 +86,28 @@
 
 1. 镜像不能再是 `ghcr.io/replace-me/...`
 2. ConfigMap 里不能再有 `replace-me-*`
-3. `ExternalSecret` 不能再指向 `replace-me-secret-store`
-4. 必要密钥必须接上
+3. 必要密钥必须接上
 5. 入口仍然只走 `sloth-cloud-api.lab.localhost`
 6. 不能把 API 容器挂载到项目源码目录
 7. 不能给 API 容器写 Git 仓库或控制仓库的权限
+
+## 当前采用的启动方式
+
+现在新增了 `lab-dev-real-write` overlay。
+
+专业名词解释：
+
+- `overlay`：覆盖配置层。它复用 base 基础清单，只替换实验环境需要变的镜像、地址和密钥引用。
+- `ConfigMap`：Kubernetes 里的普通配置，不适合放密码。
+- `Secret`：Kubernetes 里的敏感配置，用来放 token、API key、cookie secret。
+- `host.docker.internal`：Mac Docker 提供的特殊主机名。Kubernetes 容器通过它访问 Mac 上已经暴露出来的本机开发服务。
+- `k3d image import`：把 Mac Docker 里的镜像导入 k3d 集群内部，这样 Pod 不需要从公网镜像仓库拉取。
+
+当前 `lab-dev-real-write` 做了三件事：
+
+1. 把 API 镜像改成 `sloth-cloud-api-lab:dev`
+2. 把 Paymenter、Convoy、Web 等地址改成本机开发服务地址
+3. 改成手动创建 `sloth-cloud-api-lab-secrets`，不把密钥写进 Git
 
 ## 检查命令
 
@@ -102,19 +119,20 @@ ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write
 准备真正同步前：
 
 ```bash
-ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write --strict
+ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write --strict --check-cluster-secret
 ```
 
-严格模式仍然会拦住占位符和缺失的 secret store。
+严格模式会拦住占位符、缺失镜像替换和缺失的 Kubernetes Secret key。
 
 ## 当前阶段
 
-当前阶段还是不能点 `SYNC`。
+当前阶段可以进入“准备手动 SYNC 前检查”。
 
-不是因为真实写入不允许，而是因为：
+但仍然不要随手点 `DELETE`。
 
-- 镜像还没替换
-- 业务依赖 URL 还是占位符
-- secret store 还是占位符
+下一步顺序是：
 
-下一步应该把这些占位符换成真实开发环境地址和密钥。
+1. 导入本地 API 镜像
+2. 从本机开发 env 种入 Kubernetes Secret
+3. 运行严格检查
+4. 只在检查通过后手动点 `SYNC`

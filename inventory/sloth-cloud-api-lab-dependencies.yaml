@@ -2,8 +2,13 @@ version: 1
 service: sloth-cloud-api-lab
 sources:
   deployment: k8s/apps/sloth-cloud-api/base/deployment.yaml
-  configmap: k8s/apps/sloth-cloud-api/lab/configmap.yaml
-  external_secret: k8s/apps/sloth-cloud-api/lab/externalsecret.yaml
+  active_overlay: k8s/apps/sloth-cloud-api/lab-dev-real-write
+  configmap: k8s/apps/sloth-cloud-api/lab-dev-real-write/configmap.yaml
+  secret_name: sloth-cloud-api-lab-secrets
+  secret_mode: manual_kubernetes_secret
+  secret_seed_script: scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh
+  image_import_script: scripts/import_sloth_cloud_api_lab_image.sh
+  legacy_external_secret: k8s/apps/sloth-cloud-api/lab/externalsecret.yaml
 classes:
   A:
     id: lab_keep
@@ -82,8 +87,12 @@ config:
     action: "Allowed in dev_real_write if the target Paymenter is development-owned; otherwise replace with a dev endpoint."
   PAYMENTER_API_URL:
     class: B
-    reason: "Current value uses replace-me-paymenter."
-    action: "Replace with a lab-safe Paymenter URL or explicitly disable Paymenter integration."
+    reason: "The active dev_real_write overlay points to the local development Paymenter exposed through host.docker.internal."
+    action: "Keep as a development-owned Paymenter endpoint; do not replace it with the remote production Paymenter."
+  PAYMENTER_TIMEOUT_MS:
+    class: A
+    reason: "Timeout value is ordinary Paymenter client tuning."
+    action: "Keep."
   CONVOY_ENABLED:
     class: C
     reason: "Current value enables real server-control integration."
@@ -94,8 +103,8 @@ config:
     action: "Allowed in dev_real_write after the Convoy endpoint is confirmed as development-owned."
   CONVOY_BASE_URL:
     class: B
-    reason: "Current value uses replace-me-convoy."
-    action: "Replace with the intended Convoy lab URL."
+    reason: "The active dev_real_write overlay points to the local development Convoy exposed through host.docker.internal."
+    action: "Keep as a development-owned Convoy endpoint."
   CONVOY_TIMEOUT_MS:
     class: A
     reason: "Timeout value is not environment-specific."
@@ -158,8 +167,8 @@ config:
     action: "Keep after build path is intentionally enabled."
   MANAGED_APP_IMAGE_REGISTRY:
     class: B
-    reason: "Current value uses replace-me-registry."
-    action: "Replace with a real lab registry before enabling managed app builds."
+    reason: "The active dev_real_write overlay points to the current development lab registry."
+    action: "Keep only while this registry is development-owned and reachable from the lab cluster."
   MANAGED_APP_IMAGE_REGISTRY_INSECURE:
     class: C
     reason: "Insecure registry access should be deliberate and isolated."
@@ -174,8 +183,8 @@ config:
     action: "Keep for lab."
   MANAGED_APP_DEFAULT_DOMAIN_SUFFIX:
     class: B
-    reason: "Current value uses replace-me.example."
-    action: "Replace with a lab domain suffix before enabling managed app previews."
+    reason: "The active dev_real_write overlay uses the current development domain suffix."
+    action: "Keep only for development previews."
   MANAGED_APP_STORAGE_CLASS:
     class: A
     reason: "local-path is normal for a local K3s/k3d lab."
@@ -200,6 +209,30 @@ config:
     class: A
     reason: "Provider fallback order is ordinary non-secret config."
     action: "Keep if assistant remains enabled."
+  ASSISTANT_OPENAI_MODEL:
+    class: A
+    reason: "Model selection is ordinary non-secret assistant config."
+    action: "Keep aligned with the local development API env."
+  ASSISTANT_OPENAI_BASE_URL:
+    class: C
+    reason: "Points assistant traffic at the local development provider proxy."
+    action: "Allowed in dev_real_write if the provider proxy is intentionally running on this Mac."
+  ASSISTANT_GEMINI_MODEL:
+    class: A
+    reason: "Model selection is ordinary non-secret assistant config."
+    action: "Keep aligned with the local development API env."
+  ASSISTANT_GEMINI_BASE_URL:
+    class: C
+    reason: "Points assistant traffic at the local development provider proxy."
+    action: "Allowed in dev_real_write if the provider proxy is intentionally running on this Mac."
+  ASSISTANT_CLAUDE_MODEL:
+    class: A
+    reason: "Model selection is ordinary non-secret assistant config."
+    action: "Keep aligned with the local development API env."
+  ASSISTANT_CLAUDE_BASE_URL:
+    class: C
+    reason: "Points assistant traffic at the local development provider proxy."
+    action: "Allowed in dev_real_write if the provider proxy is intentionally running on this Mac."
   ASSISTANT_CONFIRM_TTL_SECONDS:
     class: A
     reason: "TTL config is safe."
@@ -246,28 +279,28 @@ config:
     action: "Keep."
   OPERATOR_PREVIEW_BASE_URL:
     class: B
-    reason: "Current value uses replace-me-api."
-    action: "Replace with the lab API or preview service URL."
+    reason: "The active dev_real_write overlay publishes preview links through the lab API route."
+    action: "Keep while the route remains lab-only."
   OPERATOR_ARTIFACT_BASE_URL:
     class: B
-    reason: "Current value uses replace-me-api."
-    action: "Replace with the lab artifact base URL."
+    reason: "The active dev_real_write overlay publishes artifact links through the lab API route."
+    action: "Keep while the route remains lab-only."
   OPERATOR_WEB_BASE_URL:
     class: B
-    reason: "Current value uses replace-me-web."
-    action: "Replace with the lab web URL."
+    reason: "The active dev_real_write overlay points user-facing web links at the local development web container."
+    action: "Keep as a browser-facing development URL."
   OPERATOR_CLOUDFLARE_ZONE_NAME:
     class: B
-    reason: "Current value uses replace-me-zone."
-    action: "Replace with a lab zone or disable Cloudflare-dependent operator actions."
+    reason: "The active dev_real_write overlay uses the current development zone name."
+    action: "Keep only when Cloudflare actions are intended for the development zone."
   OPERATOR_CLOUDFLARE_TUNNEL_SERVICE:
     class: B
-    reason: "Current value uses replace-me-web."
-    action: "Replace with a lab tunnel target or disable tunnel actions."
+    reason: "The active dev_real_write overlay points tunnel traffic at the local development web container."
+    action: "Keep only for development tunnel tests."
   OPERATOR_MONITORING_WEBHOOK_BASE_URL:
     class: B
-    reason: "Current value uses replace-me-api."
-    action: "Replace with the lab monitoring webhook base URL or disable the path."
+    reason: "The active dev_real_write overlay points monitoring webhooks at the lab API route."
+    action: "Keep while monitoring webhook tests remain lab-only."
 secrets:
   CONVOY_APPLICATION_KEY:
     class: D
@@ -303,7 +336,8 @@ secrets:
     action: "Provide through ExternalSecret if monitoring webhook path is enabled."
 first_sync_gates:
   - "No ConfigMap value may contain replace-me."
-  - "ExternalSecret secretStoreRef.name must not be replace-me-secret-store."
+  - "The local image sloth-cloud-api-lab:dev must be imported into the k3d cluster."
+  - "The manual Kubernetes Secret sloth-cloud-api-lab-secrets must contain every key listed under secrets."
   - "Live integrations may write development business data, but connected targets must be development-owned or explicitly accepted."
   - "Managed app in-cluster build/deploy may be enabled only after registry, namespace, RBAC, and quota are ready."
   - "Assistant may be enabled only after provider keys and quota cookie secret are available."

@@ -18,6 +18,7 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `k8s/apps/kustomization.yaml` makes the root Argo CD application path syncable.
 - `k8s/apps/learning-whoami/base` provides a zero-dependency learning app for the first Gateway API and rollout drill.
 - `k8s/apps/sloth-cloud-api/lab` provides the first real lab overlay with ConfigMap and ExternalSecret separation.
+- `k8s/apps/sloth-cloud-api/lab-dev-real-write` provides the first real-write development overlay that points at local development Paymenter, Convoy, Web, registry, and lab routes.
 - `adr/0003-lab-first-k8s-migrations.md` records that business services must enter Kubernetes as isolated lab variants first.
 - `scripts/render_root_application.sh` renders the root Argo CD application using either `PLATFORM_GIT_REPO` or the configured `origin` remote.
 - `scripts/render_sloth_cloud_api_lab_application.sh` renders a dedicated Argo CD application for `sloth-cloud-api-lab` without enabling automatic sync.
@@ -30,6 +31,8 @@ Gateway API: the Kubernetes traffic routing model used here instead of ad hoc in
 - `runbooks/sloth-cloud-api-lab-dependency-matrix.md` records which lab API config values can be kept, replaced, disabled, or moved to secrets.
 - `runbooks/sloth-cloud-api-lab-dev-real-write-policy.md` records that development business data may be mutated while project code and control files remain protected.
 - `adr/0004-dev-real-write-lab-boundary.md` records the accepted boundary for real write lab operations.
+- `scripts/import_sloth_cloud_api_lab_image.sh` imports the current Compose API image into the k3d cluster as `sloth-cloud-api-lab:dev`.
+- `scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh` creates the manual Kubernetes Secret used by the lab API without committing secret values to Git.
 
 ## Done definition
 
@@ -71,13 +74,18 @@ Safety hardening completed after the first learning phase:
 - a dedicated Argo CD `Application` render path now exists so the lab API can appear in Argo UI without auto-syncing into the cluster
 - the lab API ConfigMap and ExternalSecret dependencies are classified before any sync attempt
 - the lab policy now allows real writes to development business state but still blocks mutation of source code, Git history, Compose definitions, Kubernetes control manifests, and traffic cutover
+- the dev real-write overlay now replaces `replace-me` URLs with local development endpoints and keeps secrets out of Git
 
 ## Next entry point
 
-Use the configured Git remote to bootstrap a Linux K3s lab, then migrate `sloth-cloud-api` first.
-For a quieter local path, bootstrap the macOS lab with k3d first, then migrate `sloth-cloud-api`.
+Prepare the runtime materials for `sloth-cloud-api-lab`, then manually sync it in Argo CD:
+
+1. Import `sloth-cloud-api-lab:dev` into k3d.
+2. Seed `sloth-cloud-api-lab-secrets`.
+3. Run strict dependency checks.
+4. Manually sync the dedicated Argo CD application.
 
 ## Open questions
 
-- Which registry will host the Kubernetes-ready `sloth-cloud-api` and `sloth-cloud-web` images?
 - Which secret manager should back External Secrets in the first lab cluster?
+- Should the next step use manual Kubernetes Secret only for learning, or should we introduce a real Secret manager before the first customer-facing lab?

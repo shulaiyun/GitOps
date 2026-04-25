@@ -8,13 +8,13 @@ spec:
   source:
     repoURL: ${PLATFORM_GIT_REPO}
     targetRevision: ${PLATFORM_GIT_REVISION}
-    path: k8s/apps/sloth-cloud-api/lab
+    path: k8s/apps/sloth-cloud-api/lab-dev-real-write
   destination:
     server: https://kubernetes.default.svc
     namespace: sloth-labs
   info:
     - name: Mode
-      value: Lab only, manual sync only
+      value: Dev real-write lab, manual sync only
     - name: Route
       value: sloth-cloud-api.lab.localhost
     - name: Current live API

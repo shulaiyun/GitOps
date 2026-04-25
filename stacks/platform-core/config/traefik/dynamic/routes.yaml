@@ -17,7 +17,7 @@ http:
       entryPoints: [web]
       service: platform-beszel
     traefik-dashboard:
-      rule: Host(`traefik.localhost`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      rule: (Host(`traefik.localhost`) || Host(`192.168.16.102`)) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       entryPoints: [web]
       service: api@internal
     sloth-cloud-web:

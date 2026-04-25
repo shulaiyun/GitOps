@@ -13,22 +13,24 @@ Add one shared operational layer above the existing compose estate so services b
 - `Homepage`, `Beszel`, `Traefik`, `Dockge`, and `Uptime Kuma` can all be brought up from the same stack.
 - `scripts/setup_beszel_local_agent.sh` provisions the local Beszel agent without hand-editing tokens into tracked files.
 - `scripts/setup_uptime_kuma_targets.sh` bootstraps Uptime Kuma, creates the first admin user, and imports the tracked monitors.
+- `scripts/sync_uptime_kuma_targets_sqlite.sh` can re-sync the tracked monitor inventory into an already initialized Uptime Kuma database. Re-sync means "make the Uptime Kuma panel match the repository inventory again", 中文就是“把监控面板重新对齐仓库里的清单”。
 - LAN-accessible service entrypoints are documented in `runbooks/lan-service-access.md`.
 - Xboard Web was recovered on the Mac and now opens at `http://192.168.16.102:7001`.
+- Uptime Kuma was recreated from the current `GitOps-learning` compose file so its data mount now lives under this repo instead of the removed `platform-control` path.
 
 ## Done definition
 
 - Platform core stack parses successfully with `docker compose config`.
 - Homepage renders the current runtime map.
-- Dockge can manage new stacks under `platform-control/stacks`.
+- Dockge can manage new stacks under the platform stack directory.
 - Uptime Kuma and Beszel are reachable on their direct ports and through Traefik.
 - The local Beszel agent is connected and container metrics are available.
-- Uptime Kuma has the initial monitor set imported from inventory.
+- Uptime Kuma has 14 initial monitors imported from `inventory/uptime-targets.yaml`. Monitor means a health check target, 中文就是“一个被监控的服务入口”。
 
 ## Verification
 
 ```bash
-cd "/Users/shulai/Documents/New project/platform-control"
+cd "/Users/shulai/Documents/New project/GitOps-learning"
 docker compose -f stacks/platform-core/compose.yaml config
 docker compose -f stacks/platform-core/compose.yaml up -d
 ```
@@ -42,6 +44,7 @@ curl -I http://127.0.0.1:15003
 curl -I http://home.localhost:15080
 bash scripts/setup_beszel_local_agent.sh
 bash scripts/setup_uptime_kuma_targets.sh
+bash scripts/sync_uptime_kuma_targets_sqlite.sh
 ```
 
 LAN checks:
@@ -53,9 +56,27 @@ curl -I http://192.168.16.102:16080
 curl -I http://192.168.16.102:7001
 ```
 
+Uptime Kuma monitor verification:
+
+```bash
+sqlite3 stacks/platform-core/data/uptime-kuma/kuma.db \
+  "select count(*) from monitor;"
+
+sqlite3 -header -column stacks/platform-core/data/uptime-kuma/kuma.db \
+  "select m.id, m.name, h.status, h.msg
+   from monitor m
+   left join heartbeat h on h.id = (
+     select id from heartbeat h2
+     where h2.monitor_id = m.id
+     order by h2.time desc
+     limit 1
+   )
+   order by m.id;"
+```
+
 ## Next entry point
 
-Keep the monitor inventory in sync with new services, then add or verify Uptime Kuma monitors for the LAN endpoints.
+Keep the monitor inventory in sync with new services, then add alert channels for Uptime Kuma.
 
 ## Open questions
 

@@ -3,9 +3,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DB_FILE="$ROOT_DIR/stacks/platform-core/data/uptime-kuma/kuma.db"
+DB_FILE="${UPTIME_KUMA_DB_FILE:-$ROOT_DIR/stacks/platform-core/data/uptime-kuma/kuma.db}"
 TARGETS_FILE="$ROOT_DIR/inventory/uptime-targets.yaml"
-CREDENTIALS_FILE="$ROOT_DIR/stacks/platform-core/data/uptime-kuma/credentials.env"
+CREDENTIALS_FILE="${UPTIME_KUMA_CREDENTIALS_FILE:-$ROOT_DIR/stacks/platform-core/data/uptime-kuma/credentials.env}"
 COMPOSE_FILE="$ROOT_DIR/stacks/platform-core/compose.yaml"
 
 if ! command -v sqlite3 >/dev/null 2>&1; then
@@ -275,6 +275,6 @@ echo
 echo "Uptime Kuma credentials:"
 echo "  file: $CREDENTIALS_FILE"
 echo "  username: $username"
-echo "  password: $(grep '^UPTIME_KUMA_PASSWORD=' "$CREDENTIALS_FILE" | cut -d= -f2-)"
+echo "  password: stored in the credentials file"
 echo
 echo "Current monitor count: $(sqlite3 "$DB_FILE" "select count(*) from monitor;")"

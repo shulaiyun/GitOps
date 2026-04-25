@@ -4,35 +4,34 @@ checks:
   - id: sloth-cloud-web
     name: Sloth Cloud Web
     type: http
-    target: http://127.0.0.1:13000/
+    target: http://192.168.16.102:13000/
     expected_status: 200
     interval_seconds: 60
     tags: [business, public, phase-0]
   - id: sloth-cloud-api
     name: Sloth Cloud API
     type: http
-    target: http://127.0.0.1:14000/api/v1/health
+    target: http://192.168.16.102:14000/api/v1/health
     expected_status: 200
     interval_seconds: 60
     tags: [business, api, phase-0]
   - id: sloth-cloud-paymenter
     name: Sloth Cloud Paymenter
     type: http
-    target: http://127.0.0.1:18080/
+    target: http://192.168.16.102:18080/
     expected_status: 200
     interval_seconds: 60
     tags: [business, storefront, phase-0]
   - id: sloth-convoy-web
     name: Sloth Convoy Web
-    type: http
-    target: http://127.0.0.1:18181/
-    expected_status: 200
+    type: tcp
+    target: 127.0.0.1:18181
     interval_seconds: 60
-    tags: [business, panel, phase-0]
+    tags: [business, backend, phase-0]
   - id: sloth-xboard-web
     name: Sloth Xboard Web
     type: http
-    target: http://127.0.0.1:7001/
+    target: http://192.168.16.102:7001/
     expected_status: 200
     interval_seconds: 60
     tags: [business, panel, phase-0]
@@ -51,28 +50,49 @@ checks:
   - id: platform-homepage
     name: Platform Homepage
     type: http
-    target: http://127.0.0.1:15002/
+    target: http://192.168.16.102:15002/
     expected_status: 200
     interval_seconds: 60
     tags: [platform, planned]
   - id: platform-dockge
     name: Platform Dockge
     type: http
-    target: http://127.0.0.1:15001/
+    target: http://192.168.16.102:15001/
     expected_status: 200
     interval_seconds: 60
     tags: [platform, planned]
   - id: platform-uptime-kuma
     name: Platform Uptime Kuma
     type: http
-    target: http://127.0.0.1:15003/
+    target: http://192.168.16.102:15003/dashboard
     expected_status: 200
     interval_seconds: 60
     tags: [platform, planned]
   - id: platform-beszel-hub
     name: Platform Beszel Hub
     type: http
-    target: http://127.0.0.1:15004/
+    target: http://192.168.16.102:15004/
     expected_status: 200
     interval_seconds: 60
     tags: [platform, planned]
+  - id: platform-traefik-dashboard
+    name: Platform Traefik Dashboard
+    type: http
+    target: http://192.168.16.102:15080/dashboard/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [platform, edge, phase-1]
+  - id: k3s-sloth-cloud-web-lab
+    name: K3s Sloth Cloud Web Lab
+    type: http
+    target: http://192.168.16.102:16080/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [kubernetes, lab, phase-2]
+  - id: k3s-sloth-cloud-api-lab
+    name: K3s Sloth Cloud API Lab
+    type: http
+    target: http://192.168.16.102:16080/api/v1/health
+    expected_status: 200
+    interval_seconds: 60
+    tags: [kubernetes, api, lab, phase-2]

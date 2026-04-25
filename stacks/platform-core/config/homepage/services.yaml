@@ -1,34 +1,44 @@
 - Business Services:
     - Sloth Cloud Web:
-        href: http://cloud.localhost:15080
-        description: 商店前台与客户入口。
+        href: http://192.168.16.102:13000
+        description: 商店前台与客户入口；局域网直连 Compose Web。
     - Sloth Cloud API:
-        href: http://cloud-api.localhost:15080
-        description: Fastify API 与运行时控制面。
+        href: http://192.168.16.102:14000/api/v1/health
+        description: Fastify API 健康检查；打开后看到 JSON 即代表 API 活着。
     - Sloth Cloud Paymenter:
-        href: http://paymenter.localhost:15080
-        description: 支付与开通应用层。
+        href: http://192.168.16.102:18080
+        description: 支付与开通应用层；局域网直连。
     - Sloth Convoy:
-        href: http://convoy.localhost:15080
-        description: Convoy 面板前端。
+        href: http://192.168.16.102:18181
+        description: Convoy 面板前端；局域网直连。
     - Sloth Xboard:
         href: http://xboard.localhost:15080
-        description: VPN 面板前端。
+        description: VPN 面板前端；当前仍依赖本机 Traefik Host 路由，后续补局域网域名。
     - CLI Proxy API:
         description: 本地工具 API，没有独立浏览器页面。
+- Kubernetes Lab:
+    - Argo CD:
+        href: http://192.168.16.102:19082
+        description: Kubernetes GitOps 管理面板；需要 Mac 上保持 port-forward 运行。
+    - Sloth Cloud Web Lab:
+        href: http://cloud.lab.localhost:16080
+        description: K3s 实验集群里的 Web 入口；当前主要在 Mac 本机访问。
+    - Sloth Cloud API Lab:
+        href: http://sloth-cloud-api.lab.localhost:16080/api/v1/health
+        description: K3s 实验集群里的 API 健康检查；当前主要在 Mac 本机访问。
 - Platform:
     - Homepage:
-        href: http://127.0.0.1:15002
-        description: 服务目录与统一操作入口。
+        href: http://192.168.16.102:15002
+        description: 服务目录与统一操作入口；其他设备也从这里进。
     - Dockge:
-        href: http://127.0.0.1:15001
+        href: http://192.168.16.102:15001
         description: Compose 栈管理面板。
     - Uptime Kuma:
-        href: http://127.0.0.1:15003
+        href: http://192.168.16.102:15003
         description: 对外可用性与黑盒探测。
     - Beszel:
-        href: http://127.0.0.1:15004
+        href: http://192.168.16.102:15004
         description: 主机与容器资源监控。
     - Traefik Dashboard:
         href: http://traefik.localhost:15080/dashboard/
-        description: 边缘路由与代理状态视图。
+        description: 边缘路由与代理状态视图；当前依赖本机 Host 路由，后续补局域网域名。

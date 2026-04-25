@@ -342,3 +342,13 @@ first_sync_gates:
   - "Managed app in-cluster build/deploy may be enabled only after registry, namespace, RBAC, and quota are ready."
   - "Assistant may be enabled only after provider keys and quota cookie secret are available."
   - "The lab API must not mutate source code, Git history, Compose definitions, or Kubernetes control files."
+last_live_verification:
+  date: "2026-04-25"
+  git_revision: "f36d3847e57d49136da5033a514431153741667b"
+  argo_sync_status: "Synced"
+  argo_health_status: "Healthy"
+  deployment_ready: "1/1"
+  pod_status: "Running"
+  route: "http://sloth-cloud-api.lab.localhost:16080/api/v1/health"
+  health_result: "ok=true sourceMode=live"
+  compose_cutover: "not performed"

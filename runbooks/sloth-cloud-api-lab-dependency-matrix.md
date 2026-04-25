@@ -163,14 +163,17 @@ ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --strict --check-cluster-
 
 ## 当前结论
 
-`sloth-cloud-api-lab` 已经从“占位配置”推进到“dev_real_write 可启动配置”。
+`sloth-cloud-api-lab` 已经从“占位配置”推进到“dev_real_write 可启动配置”，并已完成第一次手动 `SYNC`。
 
-现在还差运行前动作：
+已完成：
 
 - 把本机 Compose API 镜像导入 k3d
 - 把本机开发 env 里的密钥种入 Kubernetes Secret
 - 用严格模式确认 Secret key 齐全
+- Argo CD 手动同步成功
+- API Pod 进入 `Running`
+- `/api/v1/health` 通过 lab route 返回 `ok=true`
 
-然后才手动 `SYNC`。
+后续如果重新构建了 Compose API 镜像，需要重新执行镜像导入脚本，再让 Argo 重新同步或重启 Pod。
 
 注意：这仍然不会接管现有 Compose 的 `14000` 入口。

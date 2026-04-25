@@ -115,3 +115,44 @@ bash scripts/import_sloth_cloud_api_lab_image.sh
 bash scripts/seed_sloth_cloud_api_lab_secret_from_api_env.sh
 ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write --strict --check-cluster-secret
 ```
+
+## First manual sync result
+
+Completed on 2026-04-25 in the Mac `k3d` lab.
+
+专业名词解释：
+
+- `SYNC`：让 Kubernetes 集群里的实际资源变成 Git 里写的期望资源。
+- `Deployment`：声明应用副本数、镜像、环境变量、健康检查和资源限制。
+- `ReplicaSet`：Deployment 创建出来的副本控制器，负责维持指定数量的 Pod。
+- `Pod`：真正运行容器的最小 Kubernetes 单元。
+- `Service`：给一组 Pod 一个稳定的集群内访问入口。
+- `HTTPRoute`：Gateway API 的 HTTP 路由规则，把域名请求转给 Service。
+- `Endpoint`：Service 当前实际指向的 Pod IP 和端口。
+
+Verified state:
+
+```text
+Application: Synced / Healthy
+Operation: Succeeded
+Revision: f36d3847e57d49136da5033a514431153741667b
+Deployment: sloth-cloud-api-lab 1/1 available
+Pod: sloth-cloud-api-lab-* Running, 0 restarts
+Service endpoint: Pod port 4000 behind Service port 80
+Route: http://sloth-cloud-api.lab.localhost:16080/api/v1/health
+Health: ok=true, sourceMode=live
+```
+
+Traffic path:
+
+```text
+Mac browser or curl
+-> localhost:16080
+-> k3d load balancer
+-> Traefik Gateway
+-> HTTPRoute sloth-cloud-api-lab
+-> Service sloth-cloud-api-lab:80
+-> Pod sloth-cloud-api-lab:4000
+```
+
+The existing Compose API on `localhost:14000` remains active and was not cut over.

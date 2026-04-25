@@ -75,15 +75,17 @@ Safety hardening completed after the first learning phase:
 - the lab API ConfigMap and ExternalSecret dependencies are classified before any sync attempt
 - the lab policy now allows real writes to development business state but still blocks mutation of source code, Git history, Compose definitions, Kubernetes control manifests, and traffic cutover
 - the dev real-write overlay now replaces `replace-me` URLs with local development endpoints and keeps secrets out of Git
+- the first manual `SYNC` of `sloth-cloud-api-lab` completed successfully in Argo CD
+- the lab API is reachable through `http://sloth-cloud-api.lab.localhost:16080/api/v1/health`
 
 ## Next entry point
 
-Prepare the runtime materials for `sloth-cloud-api-lab`, then manually sync it in Argo CD:
+Use the running `sloth-cloud-api-lab` to learn real business integration safely:
 
-1. Import `sloth-cloud-api-lab:dev` into k3d.
-2. Seed `sloth-cloud-api-lab-secrets`.
-3. Run strict dependency checks.
-4. Manually sync the dedicated Argo CD application.
+1. Inspect the Argo object chain from `Application -> Deployment -> ReplicaSet -> Pod -> Logs`.
+2. Exercise low-risk authenticated API reads first.
+3. Then test one accepted development write operation and record its rollback or cleanup path.
+4. If the Compose API image changes, re-run `scripts/import_sloth_cloud_api_lab_image.sh` and restart/sync the lab Deployment.
 
 ## Open questions
 

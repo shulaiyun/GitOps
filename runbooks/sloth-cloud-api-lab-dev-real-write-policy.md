@@ -126,13 +126,22 @@ ruby scripts/check_sloth_cloud_api_lab_dependencies.rb --profile=dev_real_write 
 
 ## 当前阶段
 
-当前阶段可以进入“准备手动 SYNC 前检查”。
+当前阶段已经完成第一次手动 `SYNC`。
 
 但仍然不要随手点 `DELETE`。
 
-下一步顺序是：
+已经完成：
 
 1. 导入本地 API 镜像
 2. 从本机开发 env 种入 Kubernetes Secret
 3. 运行严格检查
-4. 只在检查通过后手动点 `SYNC`
+4. 手动点 `SYNC`
+5. 确认 `Application` 为 `Synced / Healthy`
+6. 确认 `/api/v1/health` 从 lab route 可访问
+
+后续操作原则：
+
+- 可以继续用这个 lab 练习真实开发业务写入。
+- 不要点 `DELETE`，除非本轮目标就是撤销实验资源。
+- 不要把 `sloth-cloud-api.lab.localhost` 改成正式业务入口。
+- 不要给 API 容器挂载项目源码目录或 Git 仓库。

@@ -1,0 +1,47 @@
+schema_version: 1
+base_domain: shulaiyun.top
+origin_service: http://host.docker.internal:18088
+hostnames:
+  - hostname: ops.shulaiyun.top
+    service_id: platform-homepage
+    purpose: Unified service directory.
+  - hostname: home.ops.shulaiyun.top
+    service_id: platform-homepage
+    purpose: Alias for the unified service directory.
+  - hostname: argo.ops.shulaiyun.top
+    service_id: argocd
+    purpose: Kubernetes GitOps control panel.
+  - hostname: dockge.ops.shulaiyun.top
+    service_id: platform-dockge
+    purpose: Compose stack manager.
+  - hostname: uptime.ops.shulaiyun.top
+    service_id: platform-uptime-kuma
+    purpose: Black-box uptime monitor.
+  - hostname: beszel.ops.shulaiyun.top
+    service_id: platform-beszel-hub
+    purpose: Host and container metrics dashboard.
+  - hostname: traefik.ops.shulaiyun.top
+    service_id: platform-traefik
+    purpose: Routing dashboard.
+  - hostname: cloud.ops.shulaiyun.top
+    service_id: sloth-cloud-web
+    purpose: Sloth Cloud storefront.
+  - hostname: api.ops.shulaiyun.top
+    service_id: sloth-cloud-api
+    purpose: Sloth Cloud API.
+  - hostname: paymenter.ops.shulaiyun.top
+    service_id: sloth-cloud-paymenter
+    purpose: Paymenter application.
+  - hostname: xboard.ops.shulaiyun.top
+    service_id: sloth-xboard-web
+    purpose: Xboard panel.
+  - hostname: cloud-lab.ops.shulaiyun.top
+    service_id: sloth-cloud-web-lab
+    purpose: K3s Sloth Cloud web lab.
+  - hostname: api-lab.ops.shulaiyun.top
+    service_id: sloth-cloud-api-lab
+    purpose: K3s Sloth Cloud API lab.
+  - hostname: convoy.ops.shulaiyun.top
+    service_id: sloth-convoy-web
+    purpose: Convoy component endpoint.
+

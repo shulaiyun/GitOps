@@ -1,0 +1,139 @@
+http:
+  middlewares:
+    public-basic-auth:
+      basicAuth:
+        users:
+          - "{{PUBLIC_GATEWAY_USER}}:{{PUBLIC_GATEWAY_PASSWORD_HASH}}"
+    host-homepage:
+      headers:
+        customRequestHeaders:
+          Host: "127.0.0.1:15002"
+    host-traefik-dashboard:
+      headers:
+        customRequestHeaders:
+          Host: "traefik.localhost"
+    host-cloud-lab:
+      headers:
+        customRequestHeaders:
+          Host: "cloud.lab.localhost"
+    host-api-lab:
+      headers:
+        customRequestHeaders:
+          Host: "sloth-cloud-api.lab.localhost"
+
+  routers:
+    homepage:
+      rule: "Host(`ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`home.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth, host-homepage]
+      service: homepage
+    argocd:
+      rule: "Host(`argo.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: argocd
+    dockge:
+      rule: "Host(`dockge.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: dockge
+    uptime:
+      rule: "Host(`uptime.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: uptime
+    beszel:
+      rule: "Host(`beszel.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: beszel
+    traefik-dashboard:
+      rule: "Host(`traefik.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth, host-traefik-dashboard]
+      service: traefik-dashboard
+    cloud-web:
+      rule: "Host(`cloud.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: cloud-web
+    cloud-api:
+      rule: "Host(`api.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: cloud-api
+    paymenter:
+      rule: "Host(`paymenter.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: paymenter
+    xboard:
+      rule: "Host(`xboard.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: xboard
+    cloud-lab:
+      rule: "Host(`cloud-lab.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth, host-cloud-lab]
+      service: k3s-lab-gateway
+    api-lab:
+      rule: "Host(`api-lab.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth, host-api-lab]
+      service: k3s-lab-gateway
+    convoy:
+      rule: "Host(`convoy.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      entryPoints: [web]
+      middlewares: [public-basic-auth]
+      service: convoy
+
+  services:
+    homepage:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:15002"
+    argocd:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:19082"
+    dockge:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:15001"
+    uptime:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:15003"
+    beszel:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:15004"
+    traefik-dashboard:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:15080"
+    cloud-web:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:13000"
+    cloud-api:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:14000"
+    paymenter:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:18080"
+    xboard:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:7001"
+    k3s-lab-gateway:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:16080"
+    convoy:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:18181"

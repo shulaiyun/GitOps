@@ -1,0 +1,18 @@
+name: public-gateway
+
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: public-gateway
+    restart: unless-stopped
+    command:
+      - --providers.file.filename=/etc/traefik/dynamic/routes.yaml
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:8080
+      - --api.dashboard=false
+    ports:
+      - "${PUBLIC_GATEWAY_PORT:-18088}:8080"
+    volumes:
+      - ./data/routes.yaml:/etc/traefik/dynamic/routes.yaml:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway

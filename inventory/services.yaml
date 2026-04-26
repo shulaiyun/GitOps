@@ -179,6 +179,61 @@ services:
       image: cloudflare/cloudflared:latest
       launch_mode: manual-docker
     notes: "Manual cloudflared tunnel sidecar. It is inventoried here specifically because it has not yet been adopted into a tracked compose stack."
+  - id: k3d-sloth-lab-serverlb
+    status: running
+    project: platform-lab
+    compose_project:
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:16080
+        - https://127.0.0.1:16443
+      planned_hosts:
+        - http://cloud.lab.localhost:16080
+        - http://sloth-cloud-api.lab.localhost:16080
+    ports:
+      - host: 16080
+        container: 80
+        protocol: tcp
+      - host: 16443
+        container: 443
+        protocol: tcp
+      - host: 53423
+        container: 6443
+        protocol: tcp
+    volumes: []
+    networks: [k3d-sloth-lab]
+    dependencies: [k3d-sloth-lab-server-0]
+    data_class: stateless
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      image: ghcr.io/k3d-io/k3d-proxy:5.8.3
+      launch_mode: k3d
+    notes: "K3d load balancer container for the local K3s lab. It exposes the lab Gateway API HTTP/HTTPS ports and the Kubernetes API server port."
+  - id: k3d-sloth-lab-server-0
+    status: running
+    project: platform-lab
+    compose_project:
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes: []
+    networks: [k3d-sloth-lab]
+    dependencies: []
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      image: rancher/k3s:v1.33.6-k3s1
+      launch_mode: k3d
+    notes: "Single-server K3s node inside Docker for Kubernetes learning and lab GitOps drills."
   - id: sloth-convoy-web
     status: running
     project: sloth-convoy
@@ -509,6 +564,46 @@ services:
       compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
       compose_service: dockge
     notes: "Compose-first control plane. Existing legacy stacks stay discoverable while new stacks move under /platform-control/stacks."
+  - id: public-gateway
+    status: running
+    project: platform-core
+    compose_project: public-gateway
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct:
+        - http://127.0.0.1:18088
+      planned_hosts:
+        - https://ops.shulaiyun.top
+        - https://argo.ops.shulaiyun.top
+        - https://dockge.ops.shulaiyun.top
+        - https://uptime.ops.shulaiyun.top
+        - https://beszel.ops.shulaiyun.top
+        - https://cloud.ops.shulaiyun.top
+    ports:
+      - host: 18088
+        container: 8080
+        protocol: tcp
+    volumes:
+      - ./stacks/public-gateway/data/routes.yaml:/etc/traefik/dynamic/routes.yaml:ro
+    networks: [public-gateway_default]
+    dependencies:
+      - platform-homepage
+      - platform-dockge
+      - platform-uptime-kuma
+      - platform-beszel-hub
+      - sloth-cloud-web
+      - sloth-cloud-api
+      - sloth-cloud-paymenter
+      - sloth-xboard-web
+    data_class: recoverable-state
+    migration_class: keep-compose
+    customer_visibility: managed
+    source:
+      compose_file: /Users/shulai/Documents/New project/GitOps-learning/stacks/public-gateway/compose.yaml
+      compose_service: traefik
+    notes: "Local public-domain ingress target. Cloudflare Tunnel should point public hostnames to http://host.docker.internal:18088. Basic Auth is generated into ignored local files."
   - id: platform-homepage
     status: running
     project: platform-core

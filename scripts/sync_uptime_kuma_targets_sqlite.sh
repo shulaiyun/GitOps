@@ -12,6 +12,11 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v sqlite3 >/dev/null 2>&1; then
+  echo "sqlite3 is required on the host." >&2
+  exit 1
+fi
+
 if ! command -v ruby >/dev/null 2>&1; then
   echo "ruby is required to read $TARGETS_FILE." >&2
   exit 1
@@ -27,12 +32,21 @@ if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
   exit 1
 fi
 
-if ! docker exec "$CONTAINER" sh -lc "test -f '$DB_PATH' && command -v sqlite3 >/dev/null 2>&1"; then
-  echo "Uptime Kuma database or sqlite3 is unavailable inside $CONTAINER." >&2
+DATA_SOURCE="$(docker inspect "$CONTAINER" --format '{{range .Mounts}}{{if eq .Destination "/app/data"}}{{.Source}}{{end}}{{end}}')"
+
+if [ -z "$DATA_SOURCE" ]; then
+  echo "Cannot find /app/data mount for $CONTAINER." >&2
   exit 1
 fi
 
-user_id="$(docker exec "$CONTAINER" sqlite3 "$DB_PATH" "select id from user order by id limit 1;")"
+HOST_DB_PATH="$DATA_SOURCE/$(basename "$DB_PATH")"
+
+if [ ! -f "$HOST_DB_PATH" ]; then
+  echo "Uptime Kuma database not found at $HOST_DB_PATH." >&2
+  exit 1
+fi
+
+user_id="$(sqlite3 "$HOST_DB_PATH" "select id from user order by id limit 1;")"
 
 if [ -z "$user_id" ]; then
   echo "Uptime Kuma has no user yet. Open the Uptime Kuma page and finish first-time setup first." >&2
@@ -144,9 +158,20 @@ SQL
 puts "commit;"
 RUBY
 
-docker exec -i "$CONTAINER" sqlite3 "$DB_PATH" < "$tmp_sql"
-docker restart "$CONTAINER" >/dev/null
+backup_path="$HOST_DB_PATH.bak.$(date +%Y%m%d%H%M%S)"
+cp -p "$HOST_DB_PATH" "$backup_path"
+
+docker stop "$CONTAINER" >/dev/null
+restore_container() {
+  docker start "$CONTAINER" >/dev/null || true
+}
+trap 'rm -f "$tmp_sql"; restore_container' EXIT
+
+sqlite3 "$HOST_DB_PATH" < "$tmp_sql"
+docker start "$CONTAINER" >/dev/null
+trap 'rm -f "$tmp_sql"' EXIT
 
 echo "Synced Uptime Kuma monitors from $TARGETS_FILE"
+echo "Database backup: $backup_path"
 echo "Container restarted: $CONTAINER"
-echo "Current monitor count: $(docker exec "$CONTAINER" sqlite3 "$DB_PATH" "select count(*) from monitor;")"
+echo "Current monitor count: $(sqlite3 "$HOST_DB_PATH" "select count(*) from monitor;")"

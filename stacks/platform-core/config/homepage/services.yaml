@@ -17,8 +17,8 @@
         description: 本地工具 API，没有独立浏览器页面。
 - Kubernetes Lab:
     - Argo CD:
-        href: http://jianxingjiandemacbook-air.local:16080
-        description: Kubernetes GitOps 管理面板；通过固定 HTTPRoute 进入，不再依赖临时 port-forward。
+        href: http://192.168.16.102:19082
+        description: Kubernetes GitOps 管理面板；局域网专用入口，不依赖 .local 解析。
     - Sloth Cloud Web Lab:
         href: http://192.168.16.102:16080
         description: K3s 实验集群里的 Web 入口；局域网直连到 k3d/K3s 网关。

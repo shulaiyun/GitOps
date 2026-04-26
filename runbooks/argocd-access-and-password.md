@@ -23,7 +23,8 @@
 
 - `argocd-server` 是 `ClusterIP`
 - 旧方式是靠 `kubectl port-forward` 临时打开
-- 推荐方式是靠 `HTTPRoute` 固定挂到 `http://<这台Mac名字>.local:16080/`
+- Mac 本机可用 `HTTPRoute` 固定挂到 `http://<这台Mac名字>.local:16080/`
+- 同一路由器里的其他设备，推荐用独立局域网端口：`http://<这台Mac局域网IP>:19082/`
 - 当前本地学习环境已把 `argocd-server` 调成 `server.insecure=true`，所以浏览器访问走 HTTP，避免自签 HTTPS 证书拦截
 
 所以现在不需要长期挂着一个 port-forward 终端窗口。
@@ -37,8 +38,45 @@
 - `.local`：局域网本机发现域名，通常由 macOS/Bonjour/mDNS 提供，不依赖公网 DNS。
 - `server.insecure=true`：Argo CD 的本地学习模式，表示 UI 用 HTTP，不强制跳转自签 HTTPS。
 - 自签 HTTPS 证书：不是公网 CA 签发的证书，浏览器会警告；本地实验可用 HTTP 绕开这个学习障碍。
+- `LAN port-forward`：局域网端口转发。这里把这台 Mac 的 `19082` 端口转发到 Kubernetes 里的 `argocd-server`。
 
-## 推荐打开方式：固定局域网入口
+## 推荐给其他设备用：独立局域网端口
+
+先安装后台任务：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/install_argocd_lan_port_forward_agent.sh
+```
+
+它会创建一个 macOS `LaunchAgent`，长期维持这个转发：
+
+```text
+http://192.168.16.102:19082/
+```
+
+这条入口的好处是：
+
+- 不依赖 `.local` 名字解析
+- 不会跟 `16080` 上的 Sloth Cloud / Gateway API 路由混在一起
+- 不需要你手动开一个终端窗口挂着
+
+专业名词解释：
+
+- `kubectl port-forward`：把本机端口转发到 Kubernetes 集群里的服务。
+- `--address 0.0.0.0`：监听所有网卡，别的设备才能通过局域网 IP 访问。
+- `KeepAlive`：macOS 后台任务保持运行；如果进程异常退出，会自动拉起来。
+
+验证：
+
+```bash
+launchctl print gui/$(id -u)/com.sloth.argocd-lan-port-forward | sed -n '1,90p'
+curl -I --max-time 8 http://192.168.16.102:19082/
+```
+
+看到 `state = running`，并且 `curl` 返回 `HTTP/1.1 200 OK`，就说明其他设备应该也能打开。
+
+## Mac 本机也可用：固定 HTTPRoute 入口
 
 先执行一次：
 

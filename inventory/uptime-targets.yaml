@@ -103,9 +103,7 @@ checks:
   - id: k3s-argocd-lan
     name: K3s Argo CD LAN
     type: http
-    target: http://localhost:16080/
+    target: http://localhost:19082/
     expected_status: 200
-    headers:
-      Host: jianxingjiandemacbook-air.local
     interval_seconds: 60
     tags: [kubernetes, gitops, platform, phase-2]

@@ -85,7 +85,7 @@ http://jianxingjiandemacbook-air.local:16080/
 - 请求进入代理后，代理程序不一定能按 macOS 的方式解析 `.local`
 - 所以局域网地址应该绕过代理，直接访问
 
-执行：
+手动修复一次可以执行：
 
 ```bash
 cd "/Users/shulai/Documents/New project/GitOps-learning"
@@ -106,6 +106,31 @@ bash scripts/fix_macos_local_proxy_bypass.sh
 - `proxy bypass`：代理绕过。匹配到这些地址时，浏览器不走代理，直接连接。
 - `mDNS`：局域网名字发现机制，macOS 的 `.local` 主机名通常靠它工作。
 - `502 Bad Gateway`：代理或网关能收到请求，但它后面找不到或连不上真实服务。
+
+如果发现 v2rayN 或系统代理过一会儿又把规则重置掉，安装自动修复任务：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/install_macos_local_proxy_bypass_agent.sh
+```
+
+这个脚本会安装一个 macOS `LaunchAgent`，它会在登录时和每 5 分钟自动补齐代理绕过规则。
+
+专业名词解释：
+
+- `LaunchAgent`：macOS 的用户级后台任务，适合做“登录后自动执行”和“定时执行”的小任务。
+- `StartInterval`：定时执行间隔。这里是 `300` 秒，也就是每 5 分钟。
+- `Application Support`：macOS 给应用和脚本放运行配置的位置。后台任务直接执行 `Documents` 目录里的脚本可能被系统隐私权限拦住，所以安装脚本会复制一个可执行副本到这里。
+
+验证它有没有装好：
+
+```bash
+launchctl print gui/$(id -u)/com.sloth.local-proxy-bypass | sed -n '1,80p'
+scutil --proxy | sed -n '1,80p'
+curl -I --max-time 8 http://jianxingjiandemacbook-air.local:16080/
+```
+
+看到 `last exit code = 0`、`ExceptionsList` 里有 `*.local` 和 `jianxingjiandemacbook-air.local`，并且 `curl` 返回 `HTTP/1.1 200 OK`，就说明正常。
 
 ## 怎么改 Argo 登录密码
 

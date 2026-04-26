@@ -22,7 +22,31 @@ BYPASS_DOMAINS=(
   "172.16.0.0/12"
 )
 
-echo "Applying macOS proxy bypass domains:"
+contains_entry() {
+  local needle="$1"
+  shift
+
+  local entry
+  for entry in "$@"; do
+    [[ "${entry}" == "${needle}" ]] && return 0
+  done
+
+  return 1
+}
+
+is_networksetup_message() {
+  local line="$1"
+
+  [[ -z "${line}" ]] && return 0
+  [[ "${line}" == "There aren't any bypass domains set on "* ]] && return 0
+  [[ "${line}" == "Bypass domains aren't set on "* ]] && return 0
+  [[ "${line}" == *"is not a recognized network service."* ]] && return 0
+  [[ "${line}" == "An asterisk (*) denotes that a network service is disabled." ]] && return 0
+
+  return 1
+}
+
+echo "Required macOS proxy bypass domains:"
 printf '  %s\n' "${BYPASS_DOMAINS[@]}"
 echo
 
@@ -33,7 +57,19 @@ networksetup -listallnetworkservices \
       service_name="${service_name#\*}"
 
       echo "--- ${service_name}"
-      if networksetup -setproxybypassdomains "${service_name}" "${BYPASS_DOMAINS[@]}" >/dev/null 2>&1; then
+      MERGED_DOMAINS=("${BYPASS_DOMAINS[@]}")
+      current_output="$(networksetup -getproxybypassdomains "${service_name}" 2>/dev/null || true)"
+
+      while IFS= read -r current_domain; do
+        current_domain="${current_domain%$'\r'}"
+        is_networksetup_message "${current_domain}" && continue
+
+        if ! contains_entry "${current_domain}" "${MERGED_DOMAINS[@]}"; then
+          MERGED_DOMAINS+=("${current_domain}")
+        fi
+      done <<< "${current_output}"
+
+      if networksetup -setproxybypassdomains "${service_name}" "${MERGED_DOMAINS[@]}" >/dev/null 2>&1; then
         networksetup -getproxybypassdomains "${service_name}" || true
       else
         echo "Skipped: cannot update this network service."

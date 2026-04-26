@@ -198,14 +198,20 @@ def main() -> int:
     parser.add_argument("--skip-dns", action="store_true", help="Only update tunnel ingress; do not create or update DNS records.")
     args = parser.parse_args()
 
-    token = os.environ.get("CLOUDFLARE_API_TOKEN") or os.environ.get("OPERATOR_CLOUDFLARE_API_TOKEN")
+    gateway_env = load_env_file(PUBLIC_GATEWAY_ENV)
+    token = (
+        os.environ.get("CLOUDFLARE_API_TOKEN")
+        or os.environ.get("OPERATOR_CLOUDFLARE_API_TOKEN")
+        or gateway_env.get("CLOUDFLARE_API_TOKEN")
+        or gateway_env.get("OPERATOR_CLOUDFLARE_API_TOKEN")
+    )
     if not token and not args.dry_run:
         raise SystemExit(
             "Missing CLOUDFLARE_API_TOKEN or OPERATOR_CLOUDFLARE_API_TOKEN.\n"
+            f"You can store it in the ignored local file: {PUBLIC_GATEWAY_ENV}\n"
             "需要一个 Cloudflare API Token，至少包含 Zone:DNS Edit 和 Account:Cloudflare Tunnel Edit 权限。"
         )
 
-    gateway_env = load_env_file(PUBLIC_GATEWAY_ENV)
     inventory = load_public_hostnames()
     base_domain = args.zone_name or gateway_env.get("PUBLIC_BASE_DOMAIN") or inventory.get("base_domain")
     origin_service = inventory.get("origin_service") or f"http://host.docker.internal:{gateway_env.get('PUBLIC_GATEWAY_PORT', '18088')}"

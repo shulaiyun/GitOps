@@ -100,7 +100,7 @@ bash scripts/recreate_cloudflare_tunnel_http2.sh
 
 ```bash
 cd "/Users/shulai/Documents/New project/GitOps-learning"
-export CLOUDFLARE_API_TOKEN="这里填 Cloudflare API Token"
+bash scripts/save_cloudflare_api_token.sh
 python3 scripts/configure_cloudflare_public_hostnames.py
 ```
 

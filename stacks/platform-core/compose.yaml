@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
     environment:
       PUID: "${PUID:-501}"
-      PGID: "${PGID:-20}"
+      PGID: "${HOMEPAGE_PGID:-991}"
       HOMEPAGE_ALLOWED_HOSTS: "${HOMEPAGE_ALLOWED_HOSTS:-127.0.0.1:15002,localhost:15002,home.localhost:15080}"
     ports:
       - "${HOMEPAGE_PORT:-15002}:3000"

@@ -2,10 +2,11 @@
 
 ## 中文先说结论
 
-你现在同一路由器里的其他电脑访问不了 Argo CD，核心原因通常不是 Argo 坏了，而是这两件事：
+你现在同一路由器里的其他电脑访问不了 Argo CD，核心原因通常不是 Argo 坏了，而是这几件事之一：
 
 1. 你之前打开 Argo CD 用的是 `127.0.0.1` 或 `localhost`
 2. `kubectl port-forward` 默认只监听本机地址，不监听局域网地址
+3. 浏览器开了系统代理，`.local` 局域网名字被送进代理后解析失败
 
 这两个条件叠在一起，就会导致：
 
@@ -14,25 +15,97 @@
 
 因为别的电脑访问 `127.0.0.1`，访问到的是“它自己”，不是这台 Mac。
 
-另外，当前 `argocd-server` 的 Kubernetes `Service`（服务）类型还是 `ClusterIP`，这也表示它默认只在集群内部可见，不会自己暴露给局域网。
+另外，当前 `argocd-server` 的 Kubernetes `Service`（服务）类型还是 `ClusterIP`，这表示它默认只在集群内部可见，不会自己暴露给局域网。现在我们给它补了一个更稳定的局域网入口：通过 K3s/k3d 里的 Traefik Gateway 转发到 `argocd-server`。
 
 ## 当前真实状态
 
 当前这套 Mac 实验集群里：
 
 - `argocd-server` 是 `ClusterIP`
-- 要从浏览器访问它，靠的是 `kubectl port-forward`
-- `kubectl port-forward` 默认监听 `localhost`
+- 旧方式是靠 `kubectl port-forward` 临时打开
+- 推荐方式是靠 `HTTPRoute` 固定挂到 `http://<这台Mac名字>.local:16080/`
 - 当前本地学习环境已把 `argocd-server` 调成 `server.insecure=true`，所以浏览器访问走 HTTP，避免自签 HTTPS 证书拦截
 
-所以这是一个“默认仅本机访问”的入口。
+所以现在不需要长期挂着一个 port-forward 终端窗口。
 
 专业名词解释：
 
 - `ClusterIP`：Kubernetes 里的内部服务地址，只能在集群内部直接访问。
 - `port-forward`：临时把本机端口转发到集群里的某个服务。
+- `HTTPRoute`：Gateway API 的 HTTP 路由规则，用域名把请求转给 Kubernetes Service。
+- `Gateway`：Kubernetes 里的统一入口。这里是 Traefik 提供的本地网关。
+- `.local`：局域网本机发现域名，通常由 macOS/Bonjour/mDNS 提供，不依赖公网 DNS。
 - `server.insecure=true`：Argo CD 的本地学习模式，表示 UI 用 HTTP，不强制跳转自签 HTTPS。
 - 自签 HTTPS 证书：不是公网 CA 签发的证书，浏览器会警告；本地实验可用 HTTP 绕开这个学习障碍。
+
+## 推荐打开方式：固定局域网入口
+
+先执行一次：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/apply_argocd_lan_route.sh
+```
+
+脚本会自动读取这台 Mac 的 `LocalHostName`，转成小写，然后创建 Argo CD 的 `HTTPRoute`。
+
+当前这台 Mac 的入口通常是：
+
+```text
+http://jianxingjiandemacbook-air.local:16080/
+```
+
+这里的 `16080` 是本地 K3s/k3d 集群的 HTTP 入口端口。请求路径是：
+
+```text
+浏览器
+-> jianxingjiandemacbook-air.local:16080
+-> k3d-sloth-lab-serverlb
+-> Traefik Gateway
+-> HTTPRoute argocd-lan
+-> Service argocd-server
+-> Argo CD Pod
+```
+
+如果打开后是 Argo CD 登录页，说明入口正常。
+
+## v2rayN/系统代理导致 502 怎么办
+
+如果浏览器开着代理时访问：
+
+```text
+http://jianxingjiandemacbook-air.local:16080/
+```
+
+出现 `HTTP ERROR 502`，但关掉代理后能打开，这通常不是 Argo CD 坏了。
+
+原因是：
+
+- `.local` 依赖 macOS 的本地发现能力
+- 请求进入代理后，代理程序不一定能按 macOS 的方式解析 `.local`
+- 所以局域网地址应该绕过代理，直接访问
+
+执行：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/fix_macos_local_proxy_bypass.sh
+```
+
+它会把这些地址加入 macOS 代理绕过列表：
+
+- `*.local`
+- 当前 Mac 的 `.local` 名字
+- `192.168.0.0/16`
+- `10.0.0.0/8`
+- `172.16.0.0/12`
+- `localhost` / `127.0.0.0/8`
+
+专业名词解释：
+
+- `proxy bypass`：代理绕过。匹配到这些地址时，浏览器不走代理，直接连接。
+- `mDNS`：局域网名字发现机制，macOS 的 `.local` 主机名通常靠它工作。
+- `502 Bad Gateway`：代理或网关能收到请求，但它后面找不到或连不上真实服务。
 
 ## 怎么改 Argo 登录密码
 
@@ -44,7 +117,7 @@ Argo CD 官方支持两种思路：
 当前这台 Mac 没有安装本地 `argocd` CLI（命令行工具），所以仓库里提供的是第二种做法的脚本版：
 
 ```bash
-cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
+cd "/Users/shulai/Documents/New project/GitOps-learning"
 bash scripts/reset_argocd_admin_password.sh
 ```
 
@@ -83,7 +156,7 @@ Kubernetes 官方文档里，`kubectl port-forward` 的默认监听地址就是 
 使用这个脚本：
 
 ```bash
-cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
+cd "/Users/shulai/Documents/New project/GitOps-learning"
 ARGOCD_BIND_ADDRESS=0.0.0.0 bash scripts/start_argocd_ui_port_forward.sh
 ```
 
@@ -116,7 +189,7 @@ http://192.168.16.110:19080
 ### 只想自己这台 Mac 打开
 
 ```bash
-cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
+cd "/Users/shulai/Documents/New project/GitOps-learning"
 bash scripts/start_argocd_ui_port_forward.sh
 ```
 
@@ -129,7 +202,7 @@ http://127.0.0.1:19080
 ### 想让同一路由器里的其他电脑也打开
 
 ```bash
-cd "/Users/shulai/Library/Mobile Documents/com~apple~CloudDocs/Documents/New project/platform-control"
+cd "/Users/shulai/Documents/New project/GitOps-learning"
 ARGOCD_BIND_ADDRESS=0.0.0.0 bash scripts/start_argocd_ui_port_forward.sh
 ```
 

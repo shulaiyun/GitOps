@@ -178,7 +178,7 @@ services:
     source:
       image: cloudflare/cloudflared:latest
       launch_mode: manual-docker
-    notes: "Manual cloudflared tunnel sidecar. It is inventoried here specifically because it has not yet been adopted into a tracked compose stack."
+    notes: "Manual cloudflared tunnel sidecar. Recreate with scripts/recreate_cloudflare_tunnel_http2.sh so the connector uses protocol=http2 instead of QUIC when local networks or proxies block UDP."
   - id: k3d-sloth-lab-serverlb
     status: running
     project: platform-lab

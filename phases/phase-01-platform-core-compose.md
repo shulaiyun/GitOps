@@ -17,6 +17,7 @@ Add one shared operational layer above the existing compose estate so services b
 - LAN-accessible service entrypoints are documented in `runbooks/lan-service-access.md`.
 - `stacks/public-gateway/compose.yaml` adds a single fixed-domain public gateway for Cloudflare Tunnel.
 - `runbooks/public-fixed-domain-gateway.md` documents the public-domain flow with Chinese explanations for Public Gateway, Cloudflare Tunnel, Public Hostname, and Basic Auth.
+- `scripts/recreate_cloudflare_tunnel_http2.sh` recreates the existing cloudflared connector with `protocol=http2` so proxy-heavy local networks do not break the tunnel.
 - Xboard Web was recovered on the Mac and now opens at `http://192.168.16.102:7001`.
 - Uptime Kuma was recreated from the current `GitOps-learning` compose file so its data mount now lives under this repo instead of the removed `platform-control` path.
 
@@ -50,6 +51,7 @@ bash scripts/setup_uptime_kuma_targets.sh
 bash scripts/sync_uptime_kuma_targets_sqlite.sh
 bash scripts/start_public_gateway.sh
 bash scripts/check_public_gateway.sh
+bash scripts/recreate_cloudflare_tunnel_http2.sh
 ```
 
 LAN checks:

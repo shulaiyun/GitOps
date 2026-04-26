@@ -80,6 +80,17 @@ http://host.docker.internal:18088
 
 Cloudflare 这一侧必须有账号权限。现有的 `sloth-cloud-local-tunnel` token 只能让隧道连接 Cloudflare，不能新增域名规则。
 
+当前这台 Mac 上的 tunnel container（隧道容器）建议使用 `http2` 协议连接 Cloudflare：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/recreate_cloudflare_tunnel_http2.sh
+```
+
+这里的 `http2` 是 Cloudflare 隧道连接协议。默认的 `quic` 基于 UDP，中文可以理解为“走 UDP 的快速通道”，但在代理、校园网、公司网或部分路由器下更容易被拦；`http2` 走 TCP，通常更稳。
+
+当前从 tunnel 日志已经确认远端还有旧规则，例如 wildcard hostname（通配域名）`*.shulaiyun.top` 可能还指向旧内网地址。所以固定域名要真正公网生效，必须在 Cloudflare 里把下方这些 Public Hostname 规则改到新的 public gateway。
+
 你有两种办法：
 
 1. 给本机配置 Cloudflare API Token，然后用脚本自动创建公开域名。

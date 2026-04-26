@@ -92,6 +92,11 @@ function rewriteLocalHost(value) {
 
 function buildMonitor(check) {
   const interval = Math.max(Number(check.interval_seconds || 60), 20);
+  const headers = typeof check.headers === "string"
+    ? check.headers
+    : check.headers
+      ? JSON.stringify(check.headers, null, 4)
+      : null;
   const common = {
     name: check.name,
     type: check.type,
@@ -110,7 +115,7 @@ function buildMonitor(check) {
     proxyId: null,
     method: "GET",
     body: null,
-    headers: null,
+    headers,
     description: null,
     parent: null,
     basic_auth_user: null,

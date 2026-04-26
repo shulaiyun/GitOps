@@ -192,16 +192,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Configure Cloudflare Tunnel public hostnames for the Sloth public gateway.")
     parser.add_argument("--dry-run", action="store_true", help="Print intended changes without calling write APIs.")
     parser.add_argument("--container", default=os.environ.get("CLOUDFLARED_CONTAINER", "sloth-cloud-local-tunnel"))
-    parser.add_argument("--zone-name", default=os.environ.get("CLOUDFLARE_ZONE_NAME"))
-    parser.add_argument("--account-id", default=os.environ.get("CLOUDFLARE_ACCOUNT_ID"))
-    parser.add_argument("--tunnel-id", default=os.environ.get("CLOUDFLARE_TUNNEL_ID"))
+    parser.add_argument("--zone-name", default=os.environ.get("CLOUDFLARE_ZONE_NAME") or os.environ.get("OPERATOR_CLOUDFLARE_ZONE_NAME"))
+    parser.add_argument("--account-id", default=os.environ.get("CLOUDFLARE_ACCOUNT_ID") or os.environ.get("OPERATOR_CLOUDFLARE_ACCOUNT_ID"))
+    parser.add_argument("--tunnel-id", default=os.environ.get("CLOUDFLARE_TUNNEL_ID") or os.environ.get("OPERATOR_CLOUDFLARE_DEFAULT_TUNNEL_ID"))
     parser.add_argument("--skip-dns", action="store_true", help="Only update tunnel ingress; do not create or update DNS records.")
     args = parser.parse_args()
 
-    token = os.environ.get("CLOUDFLARE_API_TOKEN")
+    token = os.environ.get("CLOUDFLARE_API_TOKEN") or os.environ.get("OPERATOR_CLOUDFLARE_API_TOKEN")
     if not token and not args.dry_run:
         raise SystemExit(
-            "Missing CLOUDFLARE_API_TOKEN.\n"
+            "Missing CLOUDFLARE_API_TOKEN or OPERATOR_CLOUDFLARE_API_TOKEN.\n"
             "需要一个 Cloudflare API Token，至少包含 Zone:DNS Edit 和 Account:Cloudflare Tunnel Edit 权限。"
         )
 

@@ -86,6 +86,7 @@ Safety hardening completed after the first learning phase:
 - the first manual `SYNC` of `sloth-cloud-web-lab` completed successfully in Argo CD
 - the Web lab is reachable through `http://cloud.lab.localhost:16080/`
 - `http://cloud.lab.localhost:16080/api/v1/health` reaches the API through the Web container proxy
+- a Web lab health-probe tuning drill was completed after repeated local probe timeouts; the GitOps change relaxed `readinessProbe` and `livenessProbe` thresholds, Argo CD synced commit `156936d`, and Kubernetes rolled out a new `sloth-cloud-web` Pod with `0` restarts
 
 ## Next entry point
 

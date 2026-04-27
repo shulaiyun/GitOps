@@ -1,43 +1,60 @@
 - 业务服务:
     - 树懒云官网:
         href: https://cloud-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Sloth%20Cloud%20Ops%20Gate
         description: 树懒云 Web 前台与客户入口。
     - 树懒云 API:
         href: https://api-ops.shulaiyun.top/api/v1/health
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Sloth%20Cloud%20API%20Ops%20Gate
         description: 树懒云 API 健康检查；API 是前端和后台通信的接口。
     - 远端生产 VPN 面板:
         href: https://admin.shulaiyun.top/
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Remote%20Production%20Xboard
         description: 远端生产 Xboard 面板；Xboard 是 VPN 业务的用户和节点管理面板。
+    - 树懒云 Convoy 组件:
+        href: https://convoy-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Convoy%20Ops%20Gate
+        description: Convoy 后端组件连通性入口；Convoy 是 VPS 生命周期管理后端，不是普通用户首页。
 - 运维面板:
     - Argo CD:
         href: https://argo-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Argo%20Ops%20Gate
         description: Kubernetes GitOps 管理面板；GitOps 是用 Git 仓库驱动部署。
     - Uptime Kuma:
         href: https://uptime-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Uptime%20Ops%20Gate
         description: 公网和局域网可用性监控；Monitor 是一个健康检查目标。
     - Beszel:
         href: https://beszel-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Beszel%20Ops%20Gate
         description: 主机与容器资源监控；用于看 CPU、内存、磁盘和容器状态。
     - Dockge:
         href: https://dockge-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Dockge%20Ops%20Gate
         description: Docker Compose 栈管理面板；Compose 是一组容器的编排文件。
     - Traefik Dashboard:
         href: https://traefik-ops.shulaiyun.top/dashboard/
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Traefik%20Ops%20Gate
         description: 公网入口路由状态；Traefik 是负责按域名分流请求的反向代理。
 - Kubernetes 实验室:
     - 树懒云 Web 实验室:
         href: https://cloud-lab-ops.shulaiyun.top
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Sloth%20Cloud%20Web%20Lab
         description: K3s 实验集群里的 Web 入口；K3s 是轻量版 Kubernetes。
     - 树懒云 API 实验室:
         href: https://api-lab-ops.shulaiyun.top/api/v1/health
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Sloth%20Cloud%20API%20Lab
         description: K3s 实验集群里的 API 健康检查。
 - 局域网备用入口:
     - 本地 Homepage:
         href: http://192.168.16.102:15002
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Platform%20Homepage
         description: 局域网直连入口；公网域名异常时用。
     - 本地 Argo CD:
-        href: http://192.168.16.102:16080
+        href: http://jianxingjiandemacbook-air.local:16080
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=K3s%20Argo%20CD%20LAN
         description: 局域网直连 K3s 网关里的 Argo CD。
     - 本地树懒云官网:
         href: http://192.168.16.102:13000
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Sloth%20Cloud%20Web
         description: 局域网直连 Compose Web。

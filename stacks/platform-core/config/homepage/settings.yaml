@@ -4,6 +4,7 @@ color: slate
 headerStyle: clean
 language: zh-Hans
 target: _blank
+statusStyle: dot
 quicklaunch:
   searchDescriptions: true
 layout:

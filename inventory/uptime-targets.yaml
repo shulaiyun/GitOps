@@ -110,8 +110,10 @@ checks:
   - id: k3s-argocd-lan
     name: K3s Argo CD LAN
     type: http
-    target: http://localhost:19082/
+    target: http://host.docker.internal:16080/
     expected_status: 200
+    headers:
+      Host: jianxingjiandemacbook-air.local
     interval_seconds: 60
     tags: [kubernetes, gitops, platform, phase-2]
   - id: public-ops-portal-gate
@@ -156,3 +158,38 @@ checks:
     expected_status: 200
     interval_seconds: 60
     tags: [public, gateway, metrics, phase-1]
+  - id: public-dockge-ops-gate
+    name: Public Dockge Ops Gate
+    type: http
+    target: https://dockge-ops.shulaiyun.top/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [public, gateway, compose, phase-1]
+  - id: public-traefik-ops-gate
+    name: Public Traefik Ops Gate
+    type: http
+    target: https://traefik-ops.shulaiyun.top/dashboard/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [public, gateway, edge, phase-1]
+  - id: public-convoy-ops-gate
+    name: Public Convoy Ops Gate
+    type: http
+    target: https://convoy-ops.shulaiyun.top/
+    expected_status: 404
+    interval_seconds: 60
+    tags: [public, gateway, backend, phase-1]
+  - id: public-cloud-web-lab-gate
+    name: Public Sloth Cloud Web Lab
+    type: http
+    target: https://cloud-lab-ops.shulaiyun.top/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [public, gateway, kubernetes, lab, phase-2]
+  - id: public-cloud-api-lab-gate
+    name: Public Sloth Cloud API Lab
+    type: http
+    target: https://api-lab-ops.shulaiyun.top/api/v1/health
+    expected_status: 200
+    interval_seconds: 60
+    tags: [public, gateway, kubernetes, api, lab, phase-2]

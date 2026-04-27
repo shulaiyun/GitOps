@@ -141,6 +141,12 @@ bash scripts/recreate_cloudflare_tunnel_http2.sh
 
 If the same error persists, the current network is blocking or disturbing the tunnel connection. For a demo that must be stable outside the LAN, move the public gateway connector to an always-on cloud host or a network that can reliably connect to Cloudflare Tunnel.
 
+Detailed cloud-host migration steps are in:
+
+```text
+runbooks/public-gateway-cloud-host.md
+```
+
 ## Cloudflare setup / Cloudflare 配置
 
 Cloudflare 这一侧必须有账号权限。现有的 `sloth-cloud-local-tunnel` token 只能让隧道连接 Cloudflare，不能新增域名规则。

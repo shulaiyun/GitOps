@@ -20,6 +20,7 @@ PUBLIC_BASE_DOMAIN="${PUBLIC_BASE_DOMAIN:-shulaiyun.top}"
 PUBLIC_GATEWAY_PORT="${PUBLIC_GATEWAY_PORT:-18088}"
 PUBLIC_GATEWAY_USER="${PUBLIC_GATEWAY_USER:-sloth}"
 PUBLIC_GATEWAY_PASSWORD="${PUBLIC_GATEWAY_PASSWORD:-}"
+PUBLIC_ORIGIN_HOST="${PUBLIC_ORIGIN_HOST:-host.docker.internal}"
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
 OPERATOR_CLOUDFLARE_API_TOKEN="${OPERATOR_CLOUDFLARE_API_TOKEN:-}"
 
@@ -34,6 +35,7 @@ PUBLIC_BASE_DOMAIN=$PUBLIC_BASE_DOMAIN
 PUBLIC_GATEWAY_PORT=$PUBLIC_GATEWAY_PORT
 PUBLIC_GATEWAY_USER=$PUBLIC_GATEWAY_USER
 PUBLIC_GATEWAY_PASSWORD=$PUBLIC_GATEWAY_PASSWORD
+PUBLIC_ORIGIN_HOST=$PUBLIC_ORIGIN_HOST
 EOF
 
 if [[ -n "$CLOUDFLARE_API_TOKEN" ]]; then
@@ -44,15 +46,16 @@ if [[ -n "$OPERATOR_CLOUDFLARE_API_TOKEN" ]]; then
   printf 'OPERATOR_CLOUDFLARE_API_TOKEN=%s\n' "$OPERATOR_CLOUDFLARE_API_TOKEN" >> "$env_file"
 fi
 
-python3 - "$template" "$generated_routes" "$PUBLIC_BASE_DOMAIN" "$PUBLIC_GATEWAY_USER" "$password_hash" <<'PY'
+python3 - "$template" "$generated_routes" "$PUBLIC_BASE_DOMAIN" "$PUBLIC_GATEWAY_USER" "$password_hash" "$PUBLIC_ORIGIN_HOST" <<'PY'
 import sys
 from pathlib import Path
 
-template, output, domain, user, password_hash = sys.argv[1:]
+template, output, domain, user, password_hash, origin_host = sys.argv[1:]
 text = Path(template).read_text()
 text = text.replace("{{PUBLIC_BASE_DOMAIN}}", domain)
 text = text.replace("{{PUBLIC_GATEWAY_USER}}", user)
 text = text.replace("{{PUBLIC_GATEWAY_PASSWORD_HASH}}", password_hash)
+text = text.replace("{{PUBLIC_ORIGIN_HOST}}", origin_host)
 Path(output).write_text(text)
 PY
 
@@ -62,6 +65,9 @@ Public gateway local test URL:
 
 Cloudflare Tunnel origin service:
   http://host.docker.internal:$PUBLIC_GATEWAY_PORT
+
+Public gateway backend origin host:
+  $PUBLIC_ORIGIN_HOST
 
 Public hostnames to create:
   https://ops.$PUBLIC_BASE_DOMAIN
@@ -87,6 +93,7 @@ echo "Domain: $PUBLIC_BASE_DOMAIN"
 echo "Local port: $PUBLIC_GATEWAY_PORT"
 echo "Username: $PUBLIC_GATEWAY_USER"
 echo "Password: $PUBLIC_GATEWAY_PASSWORD"
+echo "Backend origin host: $PUBLIC_ORIGIN_HOST"
 echo
 echo "Generated files:"
 echo "  $env_file"

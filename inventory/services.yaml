@@ -632,6 +632,29 @@ services:
       compose_file: /Users/shulai/Documents/New project/platform-control/stacks/platform-core/compose.yaml
       compose_service: homepage
     notes: "Human entry point for current and future platform services. Live on http://127.0.0.1:15002."
+  - id: platform-homepage-status-api
+    status: running
+    project: platform-core
+    compose_project: platform-core
+    kind: platform
+    runtime: compose
+    owner: shulai
+    ingress:
+      direct: []
+      planned_hosts: []
+    ports: []
+    volumes:
+      - ./stacks/platform-core/status-api/status_api.py:/app/status_api.py:ro
+      - ./stacks/platform-core/data/uptime-kuma:/data:ro
+    networks: [platform-core]
+    dependencies: [platform-uptime-kuma]
+    data_class: stateless
+    migration_class: keep-compose
+    customer_visibility: internal
+    source:
+      compose_file: /Users/shulai/Documents/New project/GitOps-learning/stacks/platform-core/compose.yaml
+      compose_service: homepage-status-api
+    notes: "Internal bridge that turns Uptime Kuma heartbeat data into HTTP 200/503 checks for Homepage card status dots."
   - id: platform-uptime-kuma
     status: planned
     project: platform-core

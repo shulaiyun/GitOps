@@ -66,11 +66,27 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - platform-core
+    depends_on:
+      - homepage-status-api
     labels:
       traefik.enable: "true"
       traefik.http.routers.homepage.rule: Host(`home.localhost`)
       traefik.http.routers.homepage.entrypoints: web
       traefik.http.services.homepage.loadbalancer.server.port: "3000"
+
+  homepage-status-api:
+    image: python:3.12-alpine
+    container_name: platform-homepage-status-api
+    restart: unless-stopped
+    command: python /app/status_api.py
+    environment:
+      KUMA_DB_FILE: /data/kuma.db
+      STATUS_STALE_SECONDS: "${HOMEPAGE_STATUS_STALE_SECONDS:-300}"
+    volumes:
+      - ./status-api/status_api.py:/app/status_api.py:ro
+      - ./data/uptime-kuma:/data:ro
+    networks:
+      - platform-core
 
   uptime-kuma:
     image: louislam/uptime-kuma:1

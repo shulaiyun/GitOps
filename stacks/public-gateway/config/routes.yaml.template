@@ -93,48 +93,48 @@ http:
     homepage:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:15002"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:15002"
     argocd:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:16080"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:16080"
     dockge:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:15001"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:15001"
     uptime:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:15003"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:15003"
     beszel:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:15004"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:15004"
     traefik-dashboard:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:15080"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:15080"
     cloud-web:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:13000"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:13000"
     cloud-api:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:14000"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:14000"
     paymenter:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:18080"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:18080"
     xboard:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:7001"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:7001"
     k3s-lab-gateway:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:16080"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:16080"
     convoy:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:18181"
+          - url: "http://{{PUBLIC_ORIGIN_HOST}}:18181"

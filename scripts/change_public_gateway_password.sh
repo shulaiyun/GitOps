@@ -15,6 +15,7 @@ source "$env_file"
 PUBLIC_BASE_DOMAIN="${PUBLIC_BASE_DOMAIN:-shulaiyun.top}"
 PUBLIC_GATEWAY_PORT="${PUBLIC_GATEWAY_PORT:-18088}"
 PUBLIC_GATEWAY_USER="${PUBLIC_GATEWAY_USER:-sloth}"
+PUBLIC_ORIGIN_HOST="${PUBLIC_ORIGIN_HOST:-host.docker.internal}"
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
 OPERATOR_CLOUDFLARE_API_TOKEN="${OPERATOR_CLOUDFLARE_API_TOKEN:-}"
 
@@ -48,6 +49,7 @@ umask 077
   printf 'PUBLIC_GATEWAY_PORT=%s\n' "$(quote_env "$PUBLIC_GATEWAY_PORT")"
   printf 'PUBLIC_GATEWAY_USER=%s\n' "$(quote_env "$PUBLIC_GATEWAY_USER")"
   printf 'PUBLIC_GATEWAY_PASSWORD=%s\n' "$(quote_env "$new_password")"
+  printf 'PUBLIC_ORIGIN_HOST=%s\n' "$(quote_env "$PUBLIC_ORIGIN_HOST")"
 
   if [[ -n "$CLOUDFLARE_API_TOKEN" ]]; then
     printf 'CLOUDFLARE_API_TOKEN=%s\n' "$(quote_env "$CLOUDFLARE_API_TOKEN")"

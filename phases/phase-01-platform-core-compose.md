@@ -18,6 +18,7 @@ Add one shared operational layer above the existing compose estate so services b
 - `stacks/public-gateway/compose.yaml` adds a single fixed-domain public gateway for Cloudflare Tunnel.
 - `runbooks/public-fixed-domain-gateway.md` documents the public-domain flow with Chinese explanations for Public Gateway, Cloudflare Tunnel, Public Hostname, and Basic Auth.
 - `scripts/recreate_cloudflare_tunnel_http2.sh` recreates the existing cloudflared connector with `protocol=http2` so proxy-heavy local networks do not break the tunnel.
+- Cloudflare Tunnel now has 27 managed Public Hostnames pointing to the local public gateway. Public Hostname means a Cloudflare rule that maps one external domain to one internal service, 中文就是“公网域名到内网服务的映射规则”。
 - Xboard Web was recovered on the Mac and now opens at `http://192.168.16.102:7001`.
 - Uptime Kuma was recreated from the current `GitOps-learning` compose file so its data mount now lives under this repo instead of the removed `platform-control` path.
 
@@ -30,6 +31,7 @@ Add one shared operational layer above the existing compose estate so services b
 - The local Beszel agent is connected and container metrics are available.
 - Uptime Kuma has 14 initial monitors imported from `inventory/uptime-targets.yaml`. Monitor means a health check target, 中文就是“一个被监控的服务入口”。
 - Public gateway starts on `http://127.0.0.1:18088` and requires Basic Auth before proxying to any admin panel or business service.
+- Public fixed domains return `401 Unauthorized` without Basic Auth from the public internet, proving the shared gate is active. Basic Auth means browser username/password gate, 中文就是“浏览器弹出的统一用户名密码门禁”。
 
 ## Verification
 
@@ -52,6 +54,16 @@ bash scripts/sync_uptime_kuma_targets_sqlite.sh
 bash scripts/start_public_gateway.sh
 bash scripts/check_public_gateway.sh
 bash scripts/recreate_cloudflare_tunnel_http2.sh
+python3 scripts/configure_cloudflare_public_hostnames.py --skip-dns
+```
+
+Public fixed-domain checks:
+
+```bash
+curl --noproxy '*' -k -I https://ops.shulaiyun.top
+curl --noproxy '*' -k -I https://argo-ops.shulaiyun.top
+curl --noproxy '*' -k -I https://cloud-ops.shulaiyun.top
+curl --noproxy '*' -k -I https://api-ops.shulaiyun.top/api/v1/health
 ```
 
 LAN checks:
@@ -87,7 +99,6 @@ Keep the monitor inventory in sync with new services, then add alert channels fo
 
 ## Open questions
 
-- Which hostnames should become permanent public or internal DNS names after the localhost phase?
-- Cloudflare account-side Public Hostnames still require either a Cloudflare API Token or one browser login in the Cloudflare dashboard.
+- Which public hostnames should stay exposed long-term after the learning/demo phase?
 - Should Uptime Kuma stay socket-script managed, or should the monitor list later become a pure Git-rendered backup/import artifact?
 - Should Convoy be restored as a browser UI, or kept as a backend-only component under monitoring?

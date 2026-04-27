@@ -94,7 +94,13 @@ bash scripts/recreate_cloudflare_tunnel_http2.sh
 
 这里的 `http2` 是 Cloudflare 隧道连接协议。默认的 `quic` 基于 UDP，中文可以理解为“走 UDP 的快速通道”，但在代理、校园网、公司网或部分路由器下更容易被拦；`http2` 走 TCP，通常更稳。
 
-当前从 tunnel 日志已经确认远端还有旧规则，例如 wildcard hostname（通配域名）`*.shulaiyun.top` 可能还指向旧内网地址。所以固定域名要真正公网生效，必须在 Cloudflare 里把下方这些 Public Hostname 规则改到新的 public gateway。
+Cloudflare Tunnel ingress rules are evaluated from top to bottom. Ingress rule means “which backend service should this hostname use”, 中文就是“域名进入隧道后匹配哪一个后端服务”。Exact Sloth Ops hostnames must stay above older wildcard hostname（通配域名）rules such as `*.shulaiyun.top`, otherwise the broad wildcard can capture traffic first.
+
+Current status:
+
+- Cloudflare Tunnel has 27 managed Public Hostnames for the Sloth public gateway.
+- Public unauthenticated checks return `401 Unauthorized`, which means the Basic Auth gate is active.
+- Preferred browser-sharing hostnames are the `*-ops.shulaiyun.top` aliases, such as `argo-ops.shulaiyun.top`.
 
 你有两种办法：
 
@@ -107,6 +113,13 @@ bash scripts/recreate_cloudflare_tunnel_http2.sh
 cd "/Users/shulai/Documents/New project/GitOps-learning"
 bash scripts/save_cloudflare_api_token.sh
 python3 scripts/configure_cloudflare_public_hostnames.py
+```
+
+If DNS records already exist through a wildcard DNS record, you can update only the Tunnel ingress rules:
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+python3 scripts/configure_cloudflare_public_hostnames.py --skip-dns
 ```
 
 API Token 是 Cloudflare 的接口密钥。这个脚本需要：

@@ -44,6 +44,31 @@ cd "/Users/shulai/Documents/New project/GitOps-learning"
 bash scripts/check_public_gateway.sh
 ```
 
+## Change homepage password / 修改首页访问密码
+
+首页 `https://ops.shulaiyun.top` 使用 Basic Auth。Basic Auth 是浏览器弹出的用户名密码框，当前只保护统一首页。
+
+交互式修改密码：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/change_public_gateway_password.sh
+```
+
+脚本会做四件事：
+
+- 更新 `stacks/public-gateway/.env.local` 里的 `PUBLIC_GATEWAY_PASSWORD`。
+- 重新生成 Traefik Basic Auth 哈希。哈希是密码的不可逆摘要，Traefik 实际读取的是哈希，不是明文密码。
+- 重启 Public Gateway。
+- 运行 `scripts/check_public_gateway.sh` 验证 `ops.shulaiyun.top` 仍然需要密码，其它入口不再重复弹统一密码。
+
+如果想自动生成一个强密码：
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/change_public_gateway_password.sh --generate
+```
+
 ## Public hostnames / 固定公开域名
 
 默认域名后缀是 `shulaiyun.top`。如果要换域名，编辑这个本地文件：

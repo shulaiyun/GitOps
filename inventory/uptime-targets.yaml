@@ -107,3 +107,45 @@ checks:
     expected_status: 200
     interval_seconds: 60
     tags: [kubernetes, gitops, platform, phase-2]
+  - id: public-ops-portal-gate
+    name: Public Ops Portal Gate
+    type: http
+    target: https://ops.shulaiyun.top/
+    expected_status: 401
+    interval_seconds: 60
+    tags: [public, gateway, homepage, phase-1]
+  - id: public-argo-ops-gate
+    name: Public Argo Ops Gate
+    type: http
+    target: https://argo-ops.shulaiyun.top/
+    expected_status: 401
+    interval_seconds: 60
+    tags: [public, gateway, gitops, phase-1]
+  - id: public-cloud-ops-gate
+    name: Public Sloth Cloud Ops Gate
+    type: http
+    target: https://cloud-ops.shulaiyun.top/
+    expected_status: 401
+    interval_seconds: 60
+    tags: [public, gateway, business, phase-1]
+  - id: public-api-ops-gate
+    name: Public Sloth Cloud API Ops Gate
+    type: http
+    target: https://api-ops.shulaiyun.top/api/v1/health
+    expected_status: 401
+    interval_seconds: 60
+    tags: [public, gateway, api, phase-1]
+  - id: public-uptime-ops-gate
+    name: Public Uptime Ops Gate
+    type: http
+    target: https://uptime-ops.shulaiyun.top/
+    expected_status: 401
+    interval_seconds: 60
+    tags: [public, gateway, monitoring, phase-1]
+  - id: public-beszel-ops-gate
+    name: Public Beszel Ops Gate
+    type: http
+    target: https://beszel-ops.shulaiyun.top/
+    expected_status: 401
+    interval_seconds: 60
+    tags: [public, gateway, metrics, phase-1]

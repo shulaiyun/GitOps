@@ -7,7 +7,7 @@ Add one shared operational layer above the existing compose estate so services b
 ## Implemented in this repo
 
 - `stacks/platform-core/compose.yaml` defines Traefik, Dockge, Homepage, Uptime Kuma, Beszel hub, and the gated Beszel agent profile.
-- Homepage config is preloaded with current business and platform endpoints.
+- Homepage config is preloaded as the public-first unified service portal. The canonical address is `https://ops.shulaiyun.top`, so visitors only need to remember one URL.
 - Traefik dynamic routes proxy current host-bound services under `*.localhost` hostnames.
 - `inventory/uptime-targets.yaml` captures the intended Uptime Kuma monitor list.
 - `Homepage`, `Beszel`, `Traefik`, `Dockge`, and `Uptime Kuma` can all be brought up from the same stack.
@@ -29,7 +29,7 @@ Add one shared operational layer above the existing compose estate so services b
 - Dockge can manage new stacks under the platform stack directory.
 - Uptime Kuma and Beszel are reachable on their direct ports and through Traefik.
 - The local Beszel agent is connected and container metrics are available.
-- Uptime Kuma has 14 initial monitors imported from `inventory/uptime-targets.yaml`. Monitor means a health check target, 中文就是“一个被监控的服务入口”。
+- Uptime Kuma has 21 monitors imported from `inventory/uptime-targets.yaml`, including public gate checks for `ops`, `argo-ops`, `cloud-ops`, `api-ops`, `uptime-ops`, and `beszel-ops`. Monitor means a health check target, 中文就是“一个被监控的服务入口”。
 - Public gateway starts on `http://127.0.0.1:18088` and requires Basic Auth before proxying to any admin panel or business service.
 - Public fixed domains return `401 Unauthorized` without Basic Auth from the public internet, proving the shared gate is active. Basic Auth means browser username/password gate, 中文就是“浏览器弹出的统一用户名密码门禁”。
 
@@ -64,6 +64,8 @@ curl --noproxy '*' -k -I https://ops.shulaiyun.top
 curl --noproxy '*' -k -I https://argo-ops.shulaiyun.top
 curl --noproxy '*' -k -I https://cloud-ops.shulaiyun.top
 curl --noproxy '*' -k -I https://api-ops.shulaiyun.top/api/v1/health
+curl --noproxy '*' -k -I https://uptime-ops.shulaiyun.top
+curl --noproxy '*' -k -I https://beszel-ops.shulaiyun.top
 ```
 
 LAN checks:

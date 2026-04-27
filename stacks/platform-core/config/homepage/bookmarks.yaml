@@ -1,4 +1,7 @@
 - Operations:
-    - Platform README:
-        - href: https://example.invalid/platform-control
-          description: Replace with the future remote URL of this repo.
+    - Public Portal:
+        - href: https://ops.shulaiyun.top
+          description: 统一首页地址。发给别人时优先只发这个。
+    - GitOps Repository:
+        - href: https://github.com/shulaiyun/GitOps
+          description: 平台控制仓库；GitOps 是用 Git 记录和驱动部署状态。

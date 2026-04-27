@@ -1,43 +1,56 @@
+- Unified Entry:
+    - Sloth Ops Portal:
+        href: https://ops.shulaiyun.top
+        description: 统一首页。对外只记这个地址，进来后再跳到各个面板和业务入口。
+    - Public Access Gate:
+        href: https://ops.shulaiyun.top
+        description: 已加 Basic Auth 统一门禁；Basic Auth 就是浏览器弹出的用户名密码保护。
+- Operations Panels:
+    - Argo CD:
+        href: https://argo-ops.shulaiyun.top
+        description: Kubernetes GitOps 管理面板；GitOps 是用 Git 仓库驱动部署。
+    - Uptime Kuma:
+        href: https://uptime-ops.shulaiyun.top
+        description: 公网和局域网可用性监控；Monitor 是一个健康检查目标。
+    - Beszel:
+        href: https://beszel-ops.shulaiyun.top
+        description: 主机与容器资源监控；用于看 CPU、内存、磁盘和容器状态。
+    - Dockge:
+        href: https://dockge-ops.shulaiyun.top
+        description: Docker Compose 栈管理面板；Compose 是一组容器的编排文件。
+    - Traefik Dashboard:
+        href: https://traefik-ops.shulaiyun.top/dashboard/
+        description: 公网入口路由状态；Traefik 是负责按域名分流请求的反向代理。
 - Business Services:
     - Sloth Cloud Web:
-        href: http://192.168.16.102:13000
-        description: 商店前台与客户入口；局域网直连 Compose Web。
+        href: https://cloud-ops.shulaiyun.top
+        description: 树懒云 Web 前台与客户入口。
     - Sloth Cloud API:
-        href: http://192.168.16.102:14000/api/v1/health
-        description: Fastify API 健康检查；打开后看到 JSON 即代表 API 活着。
+        href: https://api-ops.shulaiyun.top/api/v1/health
+        description: 树懒云 API 健康检查；API 是前端和后台通信的接口。
     - Sloth Cloud Paymenter:
-        href: http://192.168.16.102:18080
-        description: 支付与开通应用层；局域网直连。
-    - Sloth Convoy:
-        description: Convoy 后端组件；18181 当前只有 Caddy/PHP 入口但没有可浏览首页，先作为运行状态监控项。
+        href: https://paymenter-ops.shulaiyun.top
+        description: 支付与开通应用层。
     - Sloth Xboard:
-        href: http://192.168.16.102:7001
-        description: VPN 面板前端；已恢复 Web 容器，其他设备可用局域网直连。
-    - CLI Proxy API:
-        description: 本地工具 API，没有独立浏览器页面。
+        href: https://xboard-ops.shulaiyun.top
+        description: VPN 面板前端。
+    - Sloth Convoy:
+        href: https://convoy-ops.shulaiyun.top
+        description: Convoy 后端组件；当前没有正常浏览器首页，主要用于连通性观察。
 - Kubernetes Lab:
-    - Argo CD:
-        href: http://192.168.16.102:19082
-        description: Kubernetes GitOps 管理面板；局域网专用入口，不依赖 .local 解析。
     - Sloth Cloud Web Lab:
-        href: http://192.168.16.102:16080
-        description: K3s 实验集群里的 Web 入口；局域网直连到 k3d/K3s 网关。
+        href: https://cloud-lab-ops.shulaiyun.top
+        description: K3s 实验集群里的 Web 入口；K3s 是轻量版 Kubernetes。
     - Sloth Cloud API Lab:
-        href: http://192.168.16.102:16080/api/v1/health
-        description: K3s 实验集群里的 API 健康检查；打开后看到 JSON 即代表实验 API 活着。
-- Platform:
-    - Homepage:
+        href: https://api-lab-ops.shulaiyun.top/api/v1/health
+        description: K3s 实验集群里的 API 健康检查。
+- LAN Direct Fallback:
+    - Local Homepage:
         href: http://192.168.16.102:15002
-        description: 服务目录与统一操作入口；其他设备也从这里进。
-    - Dockge:
-        href: http://192.168.16.102:15001
-        description: Compose 栈管理面板。
-    - Uptime Kuma:
-        href: http://192.168.16.102:15003
-        description: 对外可用性与黑盒探测。
-    - Beszel:
-        href: http://192.168.16.102:15004
-        description: 主机与容器资源监控。
-    - Traefik Dashboard:
-        href: http://192.168.16.102:15080/dashboard/
-        description: 边缘路由与代理状态视图；其他设备可用局域网直连。
+        description: 局域网直连入口；公网域名异常时用。
+    - Local Argo CD:
+        href: http://192.168.16.102:16080
+        description: 局域网直连 K3s 网关里的 Argo CD。
+    - Local Sloth Cloud Web:
+        href: http://192.168.16.102:13000
+        description: 局域网直连 Compose Web。

@@ -7,9 +7,18 @@ target: _blank
 quicklaunch:
   searchDescriptions: true
 layout:
+  Unified Entry:
+    style: row
+    columns: 2
+  Operations Panels:
+    style: row
+    columns: 2
   Business Services:
     style: row
     columns: 2
-  Platform:
+  Kubernetes Lab:
+    style: row
+    columns: 2
+  LAN Direct Fallback:
     style: row
     columns: 2

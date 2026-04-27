@@ -11,6 +11,14 @@
 - Public Hostname：公开域名规则。例如 `argo.ops.shulaiyun.top` 指向哪个本地服务。
 - Basic Auth：浏览器弹窗用户名密码。即使某个后台面板本身有登录页，也先加一层统一门禁。
 
+当前对外只需要记一个入口：
+
+```text
+https://ops.shulaiyun.top
+```
+
+这个地址打开的是统一首页。统一首页再链接到 Argo CD、Uptime Kuma、Beszel、Dockge、Traefik、Sloth Cloud 等入口。
+
 ## Local gateway / 本地网关
 
 本地网关使用 Traefik。Traefik 是一个反向代理和入口网关，中文可以理解为“门口分流器”：它根据访问的域名把请求送到不同服务。
@@ -101,6 +109,8 @@ Current status:
 - Cloudflare Tunnel has 27 managed Public Hostnames for the Sloth public gateway.
 - Public unauthenticated checks return `401 Unauthorized`, which means the Basic Auth gate is active.
 - Preferred browser-sharing hostnames are the `*-ops.shulaiyun.top` aliases, such as `argo-ops.shulaiyun.top`.
+- Homepage uses `ops.shulaiyun.top` as the canonical public portal. Canonical means “the main official address”, 中文就是“统一记忆的主入口地址”。
+- Uptime Kuma monitors public gate reachability for `ops`, `argo-ops`, `cloud-ops`, `api-ops`, `uptime-ops`, and `beszel-ops`. These checks expect `401 Unauthorized`, because that proves Cloudflare Tunnel and the Basic Auth gate are reachable from the public internet.
 
 你有两种办法：
 

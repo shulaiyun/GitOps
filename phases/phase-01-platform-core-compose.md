@@ -18,6 +18,8 @@ Add one shared operational layer above the existing compose estate so services b
 - `stacks/public-gateway/compose.yaml` adds a single fixed-domain public gateway for Cloudflare Tunnel.
 - `runbooks/public-fixed-domain-gateway.md` documents the public-domain flow with Chinese explanations for Public Gateway, Cloudflare Tunnel, Public Hostname, and Basic Auth.
 - `scripts/recreate_cloudflare_tunnel_http2.sh` recreates the existing cloudflared connector with `protocol=http2` so proxy-heavy local networks do not break the tunnel.
+- `scripts/heal_cloudflare_tunnel.sh` checks the public `ops` entrypoint and recreates the `cloudflared` connector when Cloudflare reports a tunnel failure. Connector means the local process that keeps Cloudflare Tunnel connected, 中文就是“公网隧道连接器”。
+- `scripts/install_cloudflare_tunnel_healer_launchd.sh` installs a macOS launchd timer that runs the tunnel healer once per minute.
 - Cloudflare Tunnel now has 27 managed Public Hostnames pointing to the local public gateway. Public Hostname means a Cloudflare rule that maps one external domain to one internal service, 中文就是“公网域名到内网服务的映射规则”。
 - Xboard Web was recovered on the Mac and now opens at `http://192.168.16.102:7001`.
 - Uptime Kuma was recreated from the current `GitOps-learning` compose file so its data mount now lives under this repo instead of the removed `platform-control` path.
@@ -61,6 +63,7 @@ bash scripts/sync_uptime_kuma_targets_sqlite.sh
 bash scripts/start_public_gateway.sh
 bash scripts/check_public_gateway.sh
 bash scripts/recreate_cloudflare_tunnel_http2.sh
+bash scripts/heal_cloudflare_tunnel.sh
 python3 scripts/configure_cloudflare_public_hostnames.py --skip-dns
 docker compose -f stacks/platform-core/compose.yaml up -d homepage-status-api homepage
 ```

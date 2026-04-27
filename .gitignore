@@ -7,3 +7,4 @@ stacks/platform-core/config/homepage/images/
 stacks/platform-core/config/homepage/logs/
 stacks/public-gateway/.env.local
 stacks/public-gateway/data/
+runtime/

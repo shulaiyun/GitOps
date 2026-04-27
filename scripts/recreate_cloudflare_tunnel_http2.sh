@@ -3,6 +3,16 @@ set -euo pipefail
 
 container_name="${CLOUDFLARED_CONTAINER:-sloth-cloud-local-tunnel}"
 image="${CLOUDFLARED_IMAGE:-cloudflare/cloudflared:latest}"
+protocol="${CLOUDFLARED_PROTOCOL:-http2}"
+
+case "$protocol" in
+  http2|quic|auto) ;;
+  *)
+    echo "Unsupported CLOUDFLARED_PROTOCOL: $protocol" >&2
+    echo "Supported values: http2, quic, auto" >&2
+    exit 2
+    ;;
+esac
 
 if ! docker inspect "$container_name" >/dev/null 2>&1; then
   echo "Container not found: $container_name" >&2
@@ -25,11 +35,11 @@ docker run -d \
   --restart unless-stopped \
   --add-host=host.docker.internal:host-gateway \
   "$image" \
-  tunnel --no-autoupdate --protocol http2 run --token "$token" >/dev/null
+  tunnel --no-autoupdate --protocol "$protocol" run --token "$token" >/dev/null
 
 unset token
 
-echo "Recreated $container_name with cloudflared protocol=http2."
+echo "Recreated $container_name with cloudflared protocol=$protocol."
 echo "Checking recent tunnel logs:"
 sleep 5
 docker logs --tail=40 "$container_name" 2>&1 | sed -E 's/[A-Za-z0-9_-]{80,}/[REDACTED]/g'

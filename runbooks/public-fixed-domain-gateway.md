@@ -139,6 +139,37 @@ If logs show `TLS handshake with edge error`, recreate the connector with HTTP/2
 bash scripts/recreate_cloudflare_tunnel_http2.sh
 ```
 
+For short-term self-healing on this Mac, install the launchd healer:
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/heal_cloudflare_tunnel.sh
+bash scripts/install_cloudflare_tunnel_healer_launchd.sh
+```
+
+`heal_cloudflare_tunnel.sh` is a repair script. It checks `https://ops.shulaiyun.top/`; if Cloudflare returns a tunnel failure such as `530/1033`, it verifies the local public gateway, then recreates the `cloudflared` connector. It tries `http2` first, then `quic`. 中文解释：它不是让 Cloudflare 永远不坏，而是发现隧道断了以后自动重连；如果 TCP 的 `http2` 通道不稳，会再试 UDP 的 `quic` 通道。
+
+Check healer logs:
+
+```bash
+tail -n 80 ~/.sloth-ops/public-gateway-healer/logs/cloudflare-tunnel-healer.log
+launchctl print gui/$(id -u)/com.sloth.public-gateway-healer
+```
+
+The launchd installer writes a standalone healer to:
+
+```text
+~/.sloth-ops/public-gateway-healer/bin/cloudflare-tunnel-healer.sh
+```
+
+Reason: macOS may block background `launchd` jobs from reading files inside `~/Documents`, even when the same command works in your Terminal. 中文解释：终端能访问 `Documents`，不代表后台任务也能访问，所以定时修复脚本放到 `~/.sloth-ops` 更稳。
+
+To change the retry protocol order:
+
+```bash
+CLOUDFLARED_HEAL_PROTOCOLS=http2,quic bash scripts/heal_cloudflare_tunnel.sh
+```
+
 If the same error persists, the current network is blocking or disturbing the tunnel connection. For a demo that must be stable outside the LAN, move the public gateway connector to an always-on cloud host or a network that can reliably connect to Cloudflare Tunnel.
 
 Detailed cloud-host migration steps are in:

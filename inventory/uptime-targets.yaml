@@ -176,7 +176,7 @@ checks:
     name: Public Convoy Ops Gate
     type: http
     target: https://convoy-ops.shulaiyun.top/
-    expected_status: 404
+    expected_status: 200
     interval_seconds: 60
     tags: [public, gateway, backend, phase-1]
   - id: public-cloud-web-lab-gate

@@ -1,4 +1,14 @@
-- Operations Panels:
+- 业务服务:
+    - 树懒云官网:
+        href: https://cloud-ops.shulaiyun.top
+        description: 树懒云 Web 前台与客户入口。
+    - 树懒云 API:
+        href: https://api-ops.shulaiyun.top/api/v1/health
+        description: 树懒云 API 健康检查；API 是前端和后台通信的接口。
+    - 远端生产 VPN 面板:
+        href: https://admin.shulaiyun.top/
+        description: 远端生产 Xboard 面板；Xboard 是 VPN 业务的用户和节点管理面板。
+- 运维面板:
     - Argo CD:
         href: https://argo-ops.shulaiyun.top
         description: Kubernetes GitOps 管理面板；GitOps 是用 Git 仓库驱动部署。
@@ -14,36 +24,20 @@
     - Traefik Dashboard:
         href: https://traefik-ops.shulaiyun.top/dashboard/
         description: 公网入口路由状态；Traefik 是负责按域名分流请求的反向代理。
-- Business Services:
-    - Sloth Cloud Web:
-        href: https://cloud-ops.shulaiyun.top
-        description: 树懒云 Web 前台与客户入口。
-    - Sloth Cloud API:
-        href: https://api-ops.shulaiyun.top/api/v1/health
-        description: 树懒云 API 健康检查；API 是前端和后台通信的接口。
-    - Sloth Cloud Paymenter:
-        href: https://paymenter-ops.shulaiyun.top
-        description: 支付与开通应用层。
-    - Sloth Xboard:
-        href: https://xboard-ops.shulaiyun.top
-        description: VPN 面板前端。
-    - Sloth Convoy:
-        href: https://convoy-ops.shulaiyun.top
-        description: Convoy 后端组件；当前没有正常浏览器首页，主要用于连通性观察。
-- Kubernetes Lab:
-    - Sloth Cloud Web Lab:
+- Kubernetes 实验室:
+    - 树懒云 Web 实验室:
         href: https://cloud-lab-ops.shulaiyun.top
         description: K3s 实验集群里的 Web 入口；K3s 是轻量版 Kubernetes。
-    - Sloth Cloud API Lab:
+    - 树懒云 API 实验室:
         href: https://api-lab-ops.shulaiyun.top/api/v1/health
         description: K3s 实验集群里的 API 健康检查。
-- LAN Direct Fallback:
-    - Local Homepage:
+- 局域网备用入口:
+    - 本地 Homepage:
         href: http://192.168.16.102:15002
         description: 局域网直连入口；公网域名异常时用。
-    - Local Argo CD:
+    - 本地 Argo CD:
         href: http://192.168.16.102:16080
         description: 局域网直连 K3s 网关里的 Argo CD。
-    - Local Sloth Cloud Web:
+    - 本地树懒云官网:
         href: http://192.168.16.102:13000
         description: 局域网直连 Compose Web。

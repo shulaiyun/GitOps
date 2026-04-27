@@ -99,10 +99,11 @@ bash scripts/start_public_gateway.sh
 - `cloud.ops.shulaiyun.top` -> Sloth Cloud Web
 - `api.ops.shulaiyun.top` -> Sloth Cloud API
 - `paymenter.ops.shulaiyun.top` -> Paymenter
-- `xboard.ops.shulaiyun.top` -> Xboard
+- Homepage visible VPN panel -> remote production Xboard at `https://admin.shulaiyun.top/`
+- `xboard.ops.shulaiyun.top` -> local Xboard alias kept for troubleshooting, not the main visible production entry
 - `cloud-lab.ops.shulaiyun.top` -> K3s Sloth Cloud Web Lab
 - `api-lab.ops.shulaiyun.top` -> K3s Sloth Cloud API Lab
-- `convoy.ops.shulaiyun.top` -> Convoy component endpoint
+- `convoy.ops.shulaiyun.top` -> Convoy component endpoint. The current Convoy source tree does not expose a normal browser homepage, so it is monitored as a component instead of shown as a main Homepage card.
 
 Prefer the `*-ops.shulaiyun.top` names for browser sharing. They are one-label subdomains under `shulaiyun.top`, so Cloudflare's normal wildcard certificate is more likely to cover them immediately. The `*.ops.shulaiyun.top` names are still kept as aliases, but they may need extra DNS/certificate setup before HTTPS works.
 
@@ -113,6 +114,32 @@ http://host.docker.internal:18088
 ```
 
 这里 `host.docker.internal` 的意思是：从 Docker 容器里访问这台 Mac 本机。
+
+## 530 or tunnel timeout / 530 或隧道超时
+
+If public domains such as `ops.shulaiyun.top` return `530`, but the local gateway works at `http://127.0.0.1:18088`, the app route is usually fine. The failing layer is the Cloudflare Tunnel connector between this Mac and Cloudflare's edge.
+
+中文解释：`530` 通常不是首页、Argo、业务服务挂了，而是 Cloudflare 没有连回这台 Mac。先查本地，再查隧道。
+
+Check the local gateway:
+
+```bash
+curl -I http://127.0.0.1:18088/ -H 'Host: ops.shulaiyun.top'
+```
+
+Check tunnel logs:
+
+```bash
+docker logs --tail 80 sloth-cloud-local-tunnel
+```
+
+If logs show `TLS handshake with edge error`, recreate the connector with HTTP/2:
+
+```bash
+bash scripts/recreate_cloudflare_tunnel_http2.sh
+```
+
+If the same error persists, the current network is blocking or disturbing the tunnel connection. For a demo that must be stable outside the LAN, move the public gateway connector to an always-on cloud host or a network that can reliably connect to Cloudflare Tunnel.
 
 ## Cloudflare setup / Cloudflare 配置
 

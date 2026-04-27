@@ -35,6 +35,13 @@ checks:
     expected_status: 200
     interval_seconds: 60
     tags: [business, panel, phase-0]
+  - id: remote-xboard-production
+    name: Remote Production Xboard
+    type: http
+    target: https://admin.shulaiyun.top/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, panel, remote-production, phase-1]
   - id: sloth-xboard-ws
     name: Sloth Xboard WS
     type: tcp

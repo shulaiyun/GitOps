@@ -7,15 +7,15 @@ target: _blank
 quicklaunch:
   searchDescriptions: true
 layout:
-  Operations Panels:
+  业务服务:
     style: row
     columns: 2
-  Business Services:
+  运维面板:
     style: row
     columns: 2
-  Kubernetes Lab:
+  Kubernetes 实验室:
     style: row
     columns: 2
-  LAN Direct Fallback:
+  局域网备用入口:
     style: row
     columns: 2

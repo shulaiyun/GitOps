@@ -61,10 +61,10 @@ hostnames:
     purpose: HTTPS-friendly alias for Paymenter.
   - hostname: xboard.ops.shulaiyun.top
     service_id: sloth-xboard-web
-    purpose: Xboard panel.
+    purpose: Local Xboard alias for troubleshooting; Homepage uses remote production Xboard at admin.shulaiyun.top.
   - hostname: xboard-ops.shulaiyun.top
     service_id: sloth-xboard-web
-    purpose: HTTPS-friendly alias for Xboard.
+    purpose: HTTPS-friendly local Xboard alias for troubleshooting, not the main visible production VPN panel entry.
   - hostname: cloud-lab.ops.shulaiyun.top
     service_id: sloth-cloud-web-lab
     purpose: K3s Sloth Cloud web lab.

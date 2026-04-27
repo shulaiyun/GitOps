@@ -603,7 +603,7 @@ services:
     source:
       compose_file: /Users/shulai/Documents/New project/GitOps-learning/stacks/public-gateway/compose.yaml
       compose_service: traefik
-    notes: "Local public-domain ingress target. Cloudflare Tunnel should point public hostnames to http://host.docker.internal:18088. Basic Auth is generated into ignored local files."
+    notes: "Local public-domain ingress target. Cloudflare Tunnel should point public hostnames to http://host.docker.internal:18088. Basic Auth is generated into ignored local files and currently protects only the canonical ops.shulaiyun.top homepage."
   - id: platform-homepage
     status: running
     project: platform-core

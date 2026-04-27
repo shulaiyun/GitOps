@@ -16,6 +16,31 @@ source "$env_file"
 base="http://127.0.0.1:${PUBLIC_GATEWAY_PORT:-18088}"
 auth="${PUBLIC_GATEWAY_USER}:${PUBLIC_GATEWAY_PASSWORD}"
 
+echo "== Public gateway auth policy =="
+while IFS='|' read -r host route_path expected
+do
+  echo "---- $host$route_path"
+  code="$(curl --noproxy '*' -sS -o /dev/null --max-time 8 -H "Host: $host" \
+    -w "%{http_code}" \
+    "$base$route_path" || true)"
+
+  if [[ "$code" != "$expected" ]]; then
+    echo "status=$code expected=$expected"
+    exit 1
+  fi
+
+  echo "status=$code expected=$expected"
+done <<EOF
+ops.$PUBLIC_BASE_DOMAIN|/|401
+argo-ops.$PUBLIC_BASE_DOMAIN|/|200
+cloud-ops.$PUBLIC_BASE_DOMAIN|/|200
+api-ops.$PUBLIC_BASE_DOMAIN|/api/v1/health|200
+uptime-ops.$PUBLIC_BASE_DOMAIN|/dashboard|200
+beszel-ops.$PUBLIC_BASE_DOMAIN|/|200
+EOF
+
+echo
+echo "== Public gateway authenticated reachability =="
 while read -r host path
 do
   echo "---- $host"

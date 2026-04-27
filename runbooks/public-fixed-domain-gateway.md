@@ -9,7 +9,7 @@
 - Public Gateway：公开入口网关。外部访问先进入这个网关，再转发到真正服务。
 - Cloudflare Tunnel：Cloudflare 隧道。它让外网访问你的 Mac，但不需要你在路由器上做端口转发。
 - Public Hostname：公开域名规则。例如 `argo.ops.shulaiyun.top` 指向哪个本地服务。
-- Basic Auth：浏览器弹窗用户名密码。即使某个后台面板本身有登录页，也先加一层统一门禁。
+- Basic Auth：浏览器弹窗用户名密码。当前只放在统一首页 `ops.shulaiyun.top`，避免进入首页后每个子域名都重复弹一次密码。
 
 当前对外只需要记一个入口：
 
@@ -107,10 +107,10 @@ Cloudflare Tunnel ingress rules are evaluated from top to bottom. Ingress rule m
 Current status:
 
 - Cloudflare Tunnel has 27 managed Public Hostnames for the Sloth public gateway.
-- Public unauthenticated checks return `401 Unauthorized`, which means the Basic Auth gate is active.
+- Public unauthenticated checks for `ops.shulaiyun.top` return `401 Unauthorized`, which means the homepage Basic Auth gate is active.
 - Preferred browser-sharing hostnames are the `*-ops.shulaiyun.top` aliases, such as `argo-ops.shulaiyun.top`.
 - Homepage uses `ops.shulaiyun.top` as the canonical public portal. Canonical means “the main official address”, 中文就是“统一记忆的主入口地址”。
-- Uptime Kuma monitors public gate reachability for `ops`, `argo-ops`, `cloud-ops`, `api-ops`, `uptime-ops`, and `beszel-ops`. These checks expect `401 Unauthorized`, because that proves Cloudflare Tunnel and the Basic Auth gate are reachable from the public internet.
+- Uptime Kuma monitors public reachability for `ops`, `argo-ops`, `cloud-ops`, `api-ops`, `uptime-ops`, and `beszel-ops`. The `ops` check expects `401 Unauthorized`; the downstream service checks expect their normal app responses such as `200 OK`.
 
 你有两种办法：
 
@@ -154,7 +154,7 @@ API Token 是 Cloudflare 的接口密钥。这个脚本需要：
 ## Security notes / 安全说明
 
 - 不建议把 Dockge、Argo CD、Uptime Kuma、Beszel 裸露到公网。
-- 当前网关已经加了 Basic Auth 作为第一层门禁。
+- 当前网关只对统一首页 `ops.shulaiyun.top` 加 Basic Auth。其他子域名依赖各自应用自己的登录页；没有登录页的服务会直接暴露。
 - 真正面向长期公网使用时，建议再加 Cloudflare Access。Cloudflare Access 是 Cloudflare 的身份验证层，可以限制只有指定邮箱、GitHub 账号或一次性验证码用户能进入。
 - `stacks/public-gateway/.env.local` 和 `stacks/public-gateway/data/` 是本地秘密和生成配置，不要提交到 Git。
 - 参考 Cloudflare 官方文档：Tunnel configuration API 支持 `ingress` 规则；DNS API 支持创建 CNAME 记录并设置 `proxied`。

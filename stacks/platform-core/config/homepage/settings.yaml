@@ -7,9 +7,6 @@ target: _blank
 quicklaunch:
   searchDescriptions: true
 layout:
-  Unified Entry:
-    style: row
-    columns: 2
   Operations Panels:
     style: row
     columns: 2

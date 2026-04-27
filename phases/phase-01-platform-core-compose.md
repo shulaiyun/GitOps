@@ -30,8 +30,9 @@ Add one shared operational layer above the existing compose estate so services b
 - Uptime Kuma and Beszel are reachable on their direct ports and through Traefik.
 - The local Beszel agent is connected and container metrics are available.
 - Uptime Kuma has 21 monitors imported from `inventory/uptime-targets.yaml`, including public gate checks for `ops`, `argo-ops`, `cloud-ops`, `api-ops`, `uptime-ops`, and `beszel-ops`. Monitor means a health check target, 中文就是“一个被监控的服务入口”。
-- Public gateway starts on `http://127.0.0.1:18088` and requires Basic Auth before proxying to any admin panel or business service.
-- Public fixed domains return `401 Unauthorized` without Basic Auth from the public internet, proving the shared gate is active. Basic Auth means browser username/password gate, 中文就是“浏览器弹出的统一用户名密码门禁”。
+- Public gateway starts on `http://127.0.0.1:18088`. Only the canonical homepage `ops.shulaiyun.top` requires the shared Basic Auth gate; downstream links use their own app login pages or public behavior.
+- `ops.shulaiyun.top` returns `401 Unauthorized` without Basic Auth from the public internet, proving the shared gate is active. Basic Auth means browser username/password gate, 中文就是“浏览器弹出的统一用户名密码门禁”。
+- Public app hostnames such as `argo-ops.shulaiyun.top` and `cloud-ops.shulaiyun.top` are not wrapped by the shared Basic Auth gate, so they do not ask for the same password again after entering from the homepage.
 
 ## Verification
 

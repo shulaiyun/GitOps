@@ -1,10 +1,3 @@
-- Unified Entry:
-    - Sloth Ops Portal:
-        href: https://ops.shulaiyun.top
-        description: 统一首页。对外只记这个地址，进来后再跳到各个面板和业务入口。
-    - Public Access Gate:
-        href: https://ops.shulaiyun.top
-        description: 已加 Basic Auth 统一门禁；Basic Auth 就是浏览器弹出的用户名密码保护。
 - Operations Panels:
     - Argo CD:
         href: https://argo-ops.shulaiyun.top

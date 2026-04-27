@@ -26,9 +26,10 @@ def parse_kuma_time(value):
 
 
 def latest_status(name):
-    # immutable=1 lets SQLite read the mounted database without trying to
-    # create lock/journal files inside the read-only Docker volume.
-    with sqlite3.connect(f"file:{DB_FILE}?mode=ro&immutable=1", uri=True) as conn:
+    # Use normal read-only mode so SQLite can see Uptime Kuma's latest WAL
+    # entries. immutable=1 can miss fresh heartbeat rows and mark healthy
+    # monitors as stale.
+    with sqlite3.connect(f"file:{DB_FILE}?mode=ro", uri=True) as conn:
         conn.row_factory = sqlite3.Row
         row = conn.execute(
             """

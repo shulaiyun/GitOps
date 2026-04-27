@@ -1,8 +1,8 @@
 - 业务服务:
     - 树懒云官网:
-        href: https://cloud-ops.shulaiyun.top
-        siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Sloth%20Cloud%20Ops%20Gate
-        description: 树懒云 Web 前台与客户入口。
+        href: https://shu.jxjvip.help/
+        siteMonitor: http://platform-homepage-status-api:8080/status?name=Remote%20Sloth%20Cloud%20Frontend
+        description: 远端云服务器部署的树懒云客户前台。
     - 树懒云 API:
         href: https://api-ops.shulaiyun.top/api/v1/health
         siteMonitor: http://platform-homepage-status-api:8080/status?name=Public%20Sloth%20Cloud%20API%20Ops%20Gate

@@ -193,3 +193,10 @@ checks:
     expected_status: 200
     interval_seconds: 60
     tags: [public, gateway, kubernetes, api, lab, phase-2]
+  - id: remote-sloth-cloud-frontend
+    name: Remote Sloth Cloud Frontend
+    type: http
+    target: https://shu.jxjvip.help/
+    expected_status: 200
+    interval_seconds: 60
+    tags: [business, storefront, remote-production]

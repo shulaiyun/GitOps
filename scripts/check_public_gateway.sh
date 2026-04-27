@@ -19,21 +19,34 @@ auth="${PUBLIC_GATEWAY_USER}:${PUBLIC_GATEWAY_PASSWORD}"
 while read -r host path
 do
   echo "---- $host"
-  curl -sS -o /dev/null --max-time 8 -u "$auth" -H "Host: $host" \
+  curl --noproxy '*' -sS -o /dev/null --max-time 8 -u "$auth" -H "Host: $host" \
     -w "status=%{http_code} content_type=%{content_type}\n" \
-    "$base$path"
+    "$base$path" || true
 done <<EOF
 ops.$PUBLIC_BASE_DOMAIN /
+home-ops.$PUBLIC_BASE_DOMAIN /
 argo.ops.$PUBLIC_BASE_DOMAIN /
+argo-ops.$PUBLIC_BASE_DOMAIN /
 dockge.ops.$PUBLIC_BASE_DOMAIN /
+dockge-ops.$PUBLIC_BASE_DOMAIN /
 uptime.ops.$PUBLIC_BASE_DOMAIN /
+uptime-ops.$PUBLIC_BASE_DOMAIN /
 beszel.ops.$PUBLIC_BASE_DOMAIN /
+beszel-ops.$PUBLIC_BASE_DOMAIN /
 traefik.ops.$PUBLIC_BASE_DOMAIN /dashboard/
+traefik-ops.$PUBLIC_BASE_DOMAIN /dashboard/
 cloud.ops.$PUBLIC_BASE_DOMAIN /
+cloud-ops.$PUBLIC_BASE_DOMAIN /
 api.ops.$PUBLIC_BASE_DOMAIN /api/v1/health
+api-ops.$PUBLIC_BASE_DOMAIN /api/v1/health
 paymenter.ops.$PUBLIC_BASE_DOMAIN /
+paymenter-ops.$PUBLIC_BASE_DOMAIN /
 xboard.ops.$PUBLIC_BASE_DOMAIN /
+xboard-ops.$PUBLIC_BASE_DOMAIN /
 cloud-lab.ops.$PUBLIC_BASE_DOMAIN /
+cloud-lab-ops.$PUBLIC_BASE_DOMAIN /
 api-lab.ops.$PUBLIC_BASE_DOMAIN /api/v1/health
+api-lab-ops.$PUBLIC_BASE_DOMAIN /api/v1/health
 convoy.ops.$PUBLIC_BASE_DOMAIN /
+convoy-ops.$PUBLIC_BASE_DOMAIN /
 EOF

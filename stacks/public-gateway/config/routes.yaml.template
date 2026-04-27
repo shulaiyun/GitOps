@@ -12,6 +12,10 @@ http:
       headers:
         customRequestHeaders:
           Host: "traefik.localhost"
+    host-argocd-lan:
+      headers:
+        customRequestHeaders:
+          Host: "jianxingjiandemacbook-air.local"
     host-cloud-lab:
       headers:
         customRequestHeaders:
@@ -23,67 +27,67 @@ http:
 
   routers:
     homepage:
-      rule: "Host(`ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`home.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`home.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`home-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth, host-homepage]
       service: homepage
     argocd:
-      rule: "Host(`argo.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`argo.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`argo-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
-      middlewares: [public-basic-auth]
+      middlewares: [public-basic-auth, host-argocd-lan]
       service: argocd
     dockge:
-      rule: "Host(`dockge.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`dockge.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`dockge-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: dockge
     uptime:
-      rule: "Host(`uptime.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`uptime.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`uptime-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: uptime
     beszel:
-      rule: "Host(`beszel.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`beszel.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`beszel-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: beszel
     traefik-dashboard:
-      rule: "Host(`traefik.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`traefik.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`traefik-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth, host-traefik-dashboard]
       service: traefik-dashboard
     cloud-web:
-      rule: "Host(`cloud.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`cloud.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`cloud-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: cloud-web
     cloud-api:
-      rule: "Host(`api.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`api.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`api-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: cloud-api
     paymenter:
-      rule: "Host(`paymenter.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`paymenter.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`paymenter-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: paymenter
     xboard:
-      rule: "Host(`xboard.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`xboard.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`xboard-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: xboard
     cloud-lab:
-      rule: "Host(`cloud-lab.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`cloud-lab.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`cloud-lab-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth, host-cloud-lab]
       service: k3s-lab-gateway
     api-lab:
-      rule: "Host(`api-lab.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`api-lab.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`api-lab-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth, host-api-lab]
       service: k3s-lab-gateway
     convoy:
-      rule: "Host(`convoy.ops.{{PUBLIC_BASE_DOMAIN}}`)"
+      rule: "Host(`convoy.ops.{{PUBLIC_BASE_DOMAIN}}`) || Host(`convoy-ops.{{PUBLIC_BASE_DOMAIN}}`)"
       entryPoints: [web]
       middlewares: [public-basic-auth]
       service: convoy
@@ -96,7 +100,7 @@ http:
     argocd:
       loadBalancer:
         servers:
-          - url: "http://host.docker.internal:19082"
+          - url: "http://host.docker.internal:16080"
     dockge:
       loadBalancer:
         servers:

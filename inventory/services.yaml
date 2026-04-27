@@ -576,11 +576,11 @@ services:
         - http://127.0.0.1:18088
       planned_hosts:
         - https://ops.shulaiyun.top
-        - https://argo.ops.shulaiyun.top
-        - https://dockge.ops.shulaiyun.top
-        - https://uptime.ops.shulaiyun.top
-        - https://beszel.ops.shulaiyun.top
-        - https://cloud.ops.shulaiyun.top
+        - https://argo-ops.shulaiyun.top
+        - https://dockge-ops.shulaiyun.top
+        - https://uptime-ops.shulaiyun.top
+        - https://beszel-ops.shulaiyun.top
+        - https://cloud-ops.shulaiyun.top
     ports:
       - host: 18088
         container: 8080

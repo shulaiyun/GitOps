@@ -20,6 +20,8 @@ PUBLIC_BASE_DOMAIN="${PUBLIC_BASE_DOMAIN:-shulaiyun.top}"
 PUBLIC_GATEWAY_PORT="${PUBLIC_GATEWAY_PORT:-18088}"
 PUBLIC_GATEWAY_USER="${PUBLIC_GATEWAY_USER:-sloth}"
 PUBLIC_GATEWAY_PASSWORD="${PUBLIC_GATEWAY_PASSWORD:-}"
+CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-}"
+OPERATOR_CLOUDFLARE_API_TOKEN="${OPERATOR_CLOUDFLARE_API_TOKEN:-}"
 
 if [[ -z "$PUBLIC_GATEWAY_PASSWORD" ]]; then
   PUBLIC_GATEWAY_PASSWORD="$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)"
@@ -33,6 +35,14 @@ PUBLIC_GATEWAY_PORT=$PUBLIC_GATEWAY_PORT
 PUBLIC_GATEWAY_USER=$PUBLIC_GATEWAY_USER
 PUBLIC_GATEWAY_PASSWORD=$PUBLIC_GATEWAY_PASSWORD
 EOF
+
+if [[ -n "$CLOUDFLARE_API_TOKEN" ]]; then
+  printf 'CLOUDFLARE_API_TOKEN=%s\n' "$CLOUDFLARE_API_TOKEN" >> "$env_file"
+fi
+
+if [[ -n "$OPERATOR_CLOUDFLARE_API_TOKEN" ]]; then
+  printf 'OPERATOR_CLOUDFLARE_API_TOKEN=%s\n' "$OPERATOR_CLOUDFLARE_API_TOKEN" >> "$env_file"
+fi
 
 python3 - "$template" "$generated_routes" "$PUBLIC_BASE_DOMAIN" "$PUBLIC_GATEWAY_USER" "$password_hash" <<'PY'
 import sys
@@ -55,6 +65,9 @@ Cloudflare Tunnel origin service:
 
 Public hostnames to create:
   https://ops.$PUBLIC_BASE_DOMAIN
+  https://argo-ops.$PUBLIC_BASE_DOMAIN
+  https://cloud-ops.$PUBLIC_BASE_DOMAIN
+  https://api-ops.$PUBLIC_BASE_DOMAIN
   https://argo.ops.$PUBLIC_BASE_DOMAIN
   https://dockge.ops.$PUBLIC_BASE_DOMAIN
   https://uptime.ops.$PUBLIC_BASE_DOMAIN

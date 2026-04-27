@@ -176,7 +176,9 @@ def put_tunnel_configuration(
         preserved.append(rule)
 
     managed_rules = [{"hostname": hostname, "service": origin_service} for hostname in hostnames]
-    merged = preserved + managed_rules + [preserved_fallback or fallback]
+    # Cloudflare Tunnel ingress rules are evaluated top to bottom.
+    # Keep exact managed hostnames before broad existing wildcard rules.
+    merged = managed_rules + preserved + [preserved_fallback or fallback]
     body = {"config": {"ingress": merged}}
 
     if dry_run:

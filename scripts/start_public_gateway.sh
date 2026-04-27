@@ -11,6 +11,7 @@ if [[ ! -f "$env_file" || ! -f "$routes_file" ]]; then
 fi
 
 docker compose --env-file "$env_file" -f "$stack_dir/compose.yaml" up -d
+docker compose --env-file "$env_file" -f "$stack_dir/compose.yaml" restart traefik >/dev/null
 docker compose --env-file "$env_file" -f "$stack_dir/compose.yaml" ps
 
 echo

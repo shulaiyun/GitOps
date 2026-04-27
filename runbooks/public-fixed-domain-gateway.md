@@ -55,6 +55,9 @@ bash scripts/start_public_gateway.sh
 当前建议创建这些公开域名：
 
 - `ops.shulaiyun.top` -> Homepage
+- `argo-ops.shulaiyun.top` -> Argo CD, HTTPS-friendly preferred host
+- `cloud-ops.shulaiyun.top` -> Sloth Cloud Web, HTTPS-friendly preferred host
+- `api-ops.shulaiyun.top` -> Sloth Cloud API, HTTPS-friendly preferred host
 - `argo.ops.shulaiyun.top` -> Argo CD
 - `dockge.ops.shulaiyun.top` -> Dockge
 - `uptime.ops.shulaiyun.top` -> Uptime Kuma
@@ -67,6 +70,8 @@ bash scripts/start_public_gateway.sh
 - `cloud-lab.ops.shulaiyun.top` -> K3s Sloth Cloud Web Lab
 - `api-lab.ops.shulaiyun.top` -> K3s Sloth Cloud API Lab
 - `convoy.ops.shulaiyun.top` -> Convoy component endpoint
+
+Prefer the `*-ops.shulaiyun.top` names for browser sharing. They are one-label subdomains under `shulaiyun.top`, so Cloudflare's normal wildcard certificate is more likely to cover them immediately. The `*.ops.shulaiyun.top` names are still kept as aliases, but they may need extra DNS/certificate setup before HTTPS works.
 
 每个 Cloudflare Public Hostname 的本地服务地址都填：
 

@@ -149,6 +149,26 @@ bash scripts/install_cloudflare_tunnel_healer_launchd.sh
 
 `heal_cloudflare_tunnel.sh` is a repair script. It checks `https://ops.shulaiyun.top/`; if Cloudflare returns a tunnel failure such as `530/1033`, it verifies the local public gateway, then recreates the `cloudflared` connector. It tries `http2` first, then `quic`. 中文解释：它不是让 Cloudflare 永远不坏，而是发现隧道断了以后自动重连；如果 TCP 的 `http2` 通道不稳，会再试 UDP 的 `quic` 通道。
 
+Current local origin path / 当前本机回源路径:
+
+```text
+Cloudflare -> sloth-cloud-local-tunnel -> public-gateway:8080 -> platform services
+```
+
+`origin_service` is `http://public-gateway:8080`. Origin service means “where the tunnel sends traffic after Cloudflare receives it”, 中文就是“Cloudflare 收到公网请求后转发到的内部地址”。The `sloth-cloud-local-tunnel` container should be attached to Docker network `public-gateway_default`, so it can reach `public-gateway` by container name. This avoids the less stable `host.docker.internal:18088` path after Colima/Docker restarts.
+
+Verify the connector network:
+
+```bash
+docker inspect sloth-cloud-local-tunnel --format '{{json .NetworkSettings.Networks}}'
+```
+
+Verify the tunnel has the current origin config:
+
+```bash
+docker logs --tail 120 sloth-cloud-local-tunnel | grep 'public-gateway:8080'
+```
+
 Check healer logs:
 
 ```bash

@@ -20,6 +20,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PAT
 
 container_name="${CLOUDFLARED_CONTAINER:-sloth-cloud-local-tunnel}"
 image="${CLOUDFLARED_IMAGE:-cloudflare/cloudflared:latest}"
+network="${CLOUDFLARED_NETWORK:-public-gateway_default}"
 public_gateway_port="${PUBLIC_GATEWAY_PORT:-18088}"
 public_check_url="${PUBLIC_CHECK_URL:-https://ops.shulaiyun.top/}"
 public_ok_statuses="${PUBLIC_OK_STATUS_CODES:-200,301,302,401,403}"
@@ -68,20 +69,30 @@ extract_token() {
 recreate_tunnel() {
   local protocol="$1"
   local token
+  local network_note
+  local docker_run_args=(-d --name "$container_name" --restart unless-stopped)
   token="$(extract_token)"
   if [[ -z "$token" ]]; then
     log "Could not extract tunnel token from $container_name"
     return 1
   fi
 
+  network_note="host-gateway fallback"
+  if docker network inspect "$network" >/dev/null 2>&1; then
+    docker_run_args+=(--network "$network")
+    network_note="$network"
+  else
+    docker_run_args+=(--add-host=host.docker.internal:host-gateway)
+    log "Docker network not found: $network. Falling back to host.docker.internal."
+  fi
+
   docker rm -f "$container_name" >/dev/null
   docker run -d \
-    --name "$container_name" \
-    --restart unless-stopped \
-    --add-host=host.docker.internal:host-gateway \
+    "${docker_run_args[@]}" \
     "$image" \
     tunnel --no-autoupdate --protocol "$protocol" run --token "$token" >/dev/null
   unset token
+  log "Recreated $container_name protocol=$protocol network=$network_note"
 }
 
 if ! command -v docker >/dev/null 2>&1; then

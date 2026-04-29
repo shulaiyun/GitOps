@@ -219,8 +219,8 @@ def main() -> int:
     origin_service = inventory.get("origin_service") or f"http://host.docker.internal:{gateway_env.get('PUBLIC_GATEWAY_PORT', '18088')}"
     hostnames = [entry["hostname"] for entry in inventory["hostnames"]]
 
-    account_id = args.account_id
-    tunnel_id = args.tunnel_id
+    account_id = args.account_id or gateway_env.get("CLOUDFLARE_ACCOUNT_ID") or inventory.get("cloudflare_account_id")
+    tunnel_id = args.tunnel_id or gateway_env.get("CLOUDFLARE_TUNNEL_ID") or inventory.get("cloudflare_tunnel_id")
     if not account_id or not tunnel_id:
         decoded_account, decoded_tunnel = decode_cloudflared_token_from_container(args.container)
         account_id = account_id or decoded_account

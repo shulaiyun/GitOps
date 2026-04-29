@@ -1,6 +1,8 @@
 schema_version: 1
 base_domain: shulaiyun.top
-origin_service: http://host.docker.internal:18088
+cloudflare_account_id: 8dd5c0d1ec1cc27d0668ba12cc755ed4
+cloudflare_tunnel_id: 2c6f1377-0c00-4d30-b3c2-444f443fe0d0
+origin_service: http://public-gateway:8080
 hostnames:
   - hostname: ops.shulaiyun.top
     service_id: platform-homepage

@@ -176,6 +176,36 @@ tail -n 80 ~/.sloth-ops/public-gateway-healer/logs/cloudflare-tunnel-healer.log
 launchctl print gui/$(id -u)/com.sloth.public-gateway-healer
 ```
 
+If the error is `1033` / `530` and the healer log says `Local public gateway is not healthy: status=000`, check Colima first:
+
+```bash
+colima status
+```
+
+If Colima is stopped, the whole local Docker platform is offline. Start it:
+
+```bash
+colima start
+```
+
+`Colima` is the lightweight Linux VM that runs Docker on this Mac. 中文解释：你的 Homepage、Uptime Kuma、public-gateway、cloudflared tunnel 都是 Docker 容器；Colima 停了，就等于这些容器的底座停电了。
+
+To keep this local platform alive after login or after an accidental Colima stop, install the Colima platform keeper:
+
+```bash
+cd "/Users/shulai/Documents/New project/GitOps-learning"
+bash scripts/install_colima_platform_keeper_launchd.sh
+```
+
+`colima-platform-keeper` is a launchd job that checks Colima every two minutes, starts it when it is stopped, starts the known platform containers if needed, then kicks the Cloudflare tunnel healer. 中文解释：它先把“Docker 底座”扶起来，再让“公网隧道修复脚本”继续修公网入口。
+
+Check keeper logs:
+
+```bash
+tail -n 80 ~/.sloth-ops/colima-platform-keeper/logs/colima-platform-keeper.log
+launchctl print gui/$(id -u)/com.sloth.colima-platform-keeper
+```
+
 The launchd installer writes a standalone healer to:
 
 ```text

@@ -28,6 +28,7 @@ Add one shared operational layer above the existing compose estate so services b
 - Paymenter was removed from the visible Homepage entry list at the user's request, while its runtime and monitor inventory remain untouched.
 - Homepage now has per-card status indicators backed by Uptime Kuma heartbeat data through the internal `homepage-status-api` bridge. Heartbeat means the latest health check result, 中文就是“最近一次探活结果”。
 - `runbooks/public-gateway-cloud-host.md` documents moving the public connector to a small always-on cloud host.
+- Beszel local monitoring now uses Unix socket agent mode at `/beszel_socket/beszel.sock` shared between Hub and Agent. Unix socket means two local containers talk through one local communication file, 中文就是“两个容器通过同一个本地通信文件连接”，which is steadier on the Mac Docker/Colima lab than relying on a container port.
 
 ## Done definition
 
@@ -35,7 +36,7 @@ Add one shared operational layer above the existing compose estate so services b
 - Homepage renders the current runtime map.
 - Dockge can manage new stacks under the platform stack directory.
 - Uptime Kuma and Beszel are reachable on their direct ports and through Traefik.
-- The local Beszel agent is connected and container metrics are available.
+- The local Beszel agent is connected as `/beszel_socket/beszel.sock` and container metrics are available.
 - Uptime Kuma has the monitors imported from `inventory/uptime-targets.yaml`, including public gate checks for `ops`, `argo-ops`, `cloud-ops`, `api-ops`, `uptime-ops`, and `beszel-ops`, plus the remote production Xboard page. Monitor means a health check target, 中文就是“一个被监控的服务入口”。
 - Homepage cards show a small status dot sourced from Uptime Kuma's latest heartbeat. Status dot means the little up/down indicator next to each card, 中文就是“入口旁边的健康小标识”。
 - Public gateway starts on `http://127.0.0.1:18088`. Only the canonical homepage `ops.shulaiyun.top` requires the shared Basic Auth gate; downstream links use their own app login pages or public behavior.

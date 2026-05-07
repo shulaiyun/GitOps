@@ -141,7 +141,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       LISTEN: "${BESZEL_AGENT_LISTEN:-/beszel_socket/beszel.sock}"
-      HUB_URL: http://localhost:${BESZEL_PORT:-15004}
 
 networks:
   platform-core:
